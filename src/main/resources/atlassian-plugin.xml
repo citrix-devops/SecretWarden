@@ -8,6 +8,12 @@
     </plugin-info>
 
     <resource type="i18n" name="i18n" location="com.cyanoth.secretwarden.hassecret.requireadmin"/>
-    <repository-merge-check key="hasSecret" class="bean:HasSecretMergeCheck" configurable="true"/>
-
+    <repository-merge-check key="has-secret-pr-merge-check" name="Prevent Merged Secrets" class="bean:HasSecretMergeCheck" configurable="true">
+        <icon>images/secretwarden_hook_icon.png</icon>
+        <description>Require repository administrator to merge pull-request if possible secrets are identified</description>
+        <scopes>
+            <!-- <scope>project</scope> -->
+            <scope>repository</scope>
+        </scopes>
+    </repository-merge-check>
 </atlassian-plugin>

@@ -13,11 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import javax.annotation.Nonnull;
 
-/**
- * Merge-Check for an open pull-request to check whether any changed line contains a potential secret.
- * If one or more secrets if found, the merge will be blocked unless the user has repository admin permission.
- */
-@Component("hasSecretMergeCheck")
+
+@Component("HasSecretMergeCheck")
 public class HasSecretMergeCheck implements RepositoryMergeCheck {
     private static final Logger log = LoggerFactory.getLogger(HasSecretMergeCheck.class);
     private final PermissionService permissionService;
@@ -30,29 +27,37 @@ public class HasSecretMergeCheck implements RepositoryMergeCheck {
         this.i18nService = i18nService;
         this.permissionService = permissionService;
         this.pullRequestService = pullRequestService;
-
     }
-
 
     @Nonnull
     @Override
     public RepositoryHookResult preUpdate(@Nonnull PreRepositoryHookContext context,
                                           @Nonnull PullRequestMergeHookRequest request) {
 
-        final PullRequest pullRequest = request.getPullRequest();
-        final Repository repository = pullRequest.getToRef().getRepository();
+        try {
+            // TODO: load the matched secret rule set & pass it to PullRequestSecretScanner
 
-        // TODO: Check if this applies to all pushes
-        // TODO: settings is enabled else exit now
+            final PullRequest pullRequest = request.getPullRequest();
+            final Repository repository = pullRequest.getToRef().getRepository();
 
-        PullRequestSecretScanner scannedPullRequest = new PullRequestSecretScanner(pullRequestService).scan(pullRequest);
+            PullRequestSecretScanner scannedPullRequest = new PullRequestSecretScanner(pullRequestService).scan(pullRequest);
 
-        if (scannedPullRequest.countFoundSecrets() > 0) {
-            if (!permissionService.hasRepositoryPermission(repository, Permission.REPO_ADMIN)) {
-                String summaryMsg = i18nService.getMessage("com.cyanoth.secretwarden.hassecret.requireadmin",
-                        "Possible secret(s) identified in this pull-request. You must have repository admin permissions to merge this request.");
-                return RepositoryHookResult.rejected(summaryMsg, summaryMsg);
+            int foundSecretCount = scannedPullRequest.countFoundSecrets();
+            if (foundSecretCount > 0) {
+                if (!permissionService.hasRepositoryPermission(repository, Permission.REPO_ADMIN)) {
+                    String summaryMsg = i18nService.createKeyedMessage("com.cyanoth.secretwarden.hassecretmergecheck.foundsecrets", foundSecretCount).toString();
+                    String instructionMsg = i18nService.getMessage("com.cyanoth.secretwarden.hassecretmergecheck.requireadmin");
+
+                    return RepositoryHookResult.rejected(summaryMsg, instructionMsg);
+                }
             }
+        }
+        // If an exception occurs performing this merge check, don't block the pull request from being merged - just log that an error occurred.
+        catch (ScanIncompleteException e) {
+            log.error(i18nService.getMessage("com.cyanoth.secretwarden.hassecretmergecheck.log.scanincomplete"));
+        }
+        catch (Exception e) {
+            log.error(i18nService.createKeyedMessage("com.cyanoth.secretwarden.hassecretmergecheck.log.unknownexception", e.toString()).toString());
         }
 
         return RepositoryHookResult.accepted();

@@ -1,0 +1,23 @@
+{
+  "with_thanks_to": [
+    "https://github.com/anshumanbh/git-all-secrets/blob/master/rules.json"
+  ],
+
+  "rules": [
+    {
+      "rule_identifier": "RSA_PRIVATE_KEY",
+      "friendly_name": "RSA Private Key",
+      "regex": "-----BEGIN RSA PRIVATE KEY-----.*"
+    },
+    {
+      "rule_identifier": "SLACK_TOKEN",
+      "friendly_name": "Slack Token",
+      "regex": "xox[p|b|o|a].*"
+    },
+    {
+      "rule_identifier": "PGP_PRIVATE_KEY",
+      "friendly_name": "PGP Private Key",
+      "regex": "-----BEGIN PGP PRIVATE KEY BLOCK-----.*"
+    }
+  ]
+}
