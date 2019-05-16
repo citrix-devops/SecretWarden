@@ -33,7 +33,7 @@ public class FoundSecretCollector extends AbstractDiffContentCallback {
 
     // These properties are set during various stages of the callback, we must keep this information until onSegmentLine(...)
     // where if a secret is found, then these details are called-upon to create a FoundSecret details object
-    // IMPROVEME: With this, the secret will be "somewhere in file /src/foo.java between source line 12 to 35". Better if this was an exact line number.
+    // IMPROVE_ME: With this logic, the secret will be "somewhere in file /src/foo.java between lines 12 to 35". Better if this can be an exact line number.
     private String destinationFilePath = null;
     private String sourceContext = null;
     private int sourceLine = -1;
@@ -56,17 +56,17 @@ public class FoundSecretCollector extends AbstractDiffContentCallback {
 
     @Override
     public void onSegmentLine(@Nonnull String s, @Nullable ConflictMarker conflictMarker, boolean b) {
-        if (!flag_ScanSegment || conflictMarker != null) // Ignore & don't scan this segment if preconditions for scan is false or in conflict.
+        if (!flag_ScanSegment || conflictMarker != null) // Don't scan this code segment if preconditions for a scan is false or in conflict.
             return;
 
-        // TODO: Replace this test code with matching from loaded MatchSecretRuleSet
-        // TODO: Make matching more efficent than just a contains.
-        String matchExpression = "hello";
+        for (FindSecretRule rule : FindSecretRuleSet.getruleSet()) {
 
-        if (s.contains(matchExpression)) {
-            FoundSecret foundSecret = new FoundSecret(matchExpression, destinationFilePath, sourceContext, sourceLine, destinationLine);
-            foundSecrets.add(foundSecret);
-            log.warn(String.format("Possible secret identified: %s", foundSecret.toString())); // TODO: Change me to INFO level
+            if (rule.getRegexPattern().matcher(s).matches()) {
+                log.warn("WE HAVE A MATCH! " + rule.getFriendlyName()); // TODO: REMOVE ME
+                FoundSecret foundSecret = new FoundSecret(rule.getFriendlyName(), destinationFilePath, sourceContext, sourceLine, destinationLine);
+                foundSecrets.add(foundSecret);
+                log.debug(String.format("A secret has been found: %s", foundSecret.toString()));
+            }
         }
     }
 

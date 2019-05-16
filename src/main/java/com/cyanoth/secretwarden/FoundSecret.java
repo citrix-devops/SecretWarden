@@ -8,25 +8,25 @@ import javax.annotation.Nullable;
  */
 public class FoundSecret {
 
-    private String matchedExpression = null;
+    private String matchedRuleName;
     private String destinationFilePath = null;
     private String sourceContext = null;
     private int sourceLine = -1;
     private int destLine = -1;
 
-    FoundSecret(String matchedExpression) {
-        this.matchedExpression = matchedExpression;
+    FoundSecret(String matchedRuleName) {
+        this.matchedRuleName = matchedRuleName;
     }
 
-    FoundSecret(String matchedExpression, String destinationFilePath, int sourceLine, int destLine) {
-        this.matchedExpression = matchedExpression;
+    FoundSecret(String matchedRuleName, String destinationFilePath, int sourceLine, int destLine) {
+        this.matchedRuleName = matchedRuleName;
         this.destinationFilePath = destinationFilePath;
         this.sourceLine = sourceLine;
         this.destLine = destLine;
     }
 
-    FoundSecret(String matchedExpression, String destinationFilePath, String sourceContext, int sourceLine, int destLine) {
-        this.matchedExpression = matchedExpression;
+    FoundSecret(String matchedRuleName, String destinationFilePath, String sourceContext, int sourceLine, int destLine) {
+        this.matchedRuleName = matchedRuleName;
         this.destinationFilePath = destinationFilePath;
         this.sourceContext = sourceContext;
         this.sourceLine = sourceLine;
@@ -34,11 +34,11 @@ public class FoundSecret {
     }
 
 
-    public String getMatchedExpression() {
-        return matchedExpression;
+    public String getmatchedRuleName() {
+        return matchedRuleName;
     }
 
-     public int getSourceLine() {
+    public int getSourceLine() {
         return sourceLine;
     }
 
@@ -57,7 +57,7 @@ public class FoundSecret {
     }
 
     public String toString() {
-        String builder = String.format("Matched Expression: %s", matchedExpression);
+        String builder = String.format("Matched Rule Name: %s", matchedRuleName);
 
         if (destinationFilePath != null)
             builder += String.format(" File Path: %s", destinationFilePath);

@@ -7,7 +7,8 @@
         <param name="plugin-logo">images/pluginLogo.png</param>
     </plugin-info>
 
-    <resource type="i18n" name="i18n" location="com.cyanoth.secretwarden.hassecret.requireadmin"/>
+    <resource type="i18n" name="SecretWarden" location="com.cyanoth.secretwarden"/>
+
     <repository-merge-check key="has-secret-pr-merge-check" name="Prevent Merged Secrets" class="bean:HasSecretMergeCheck" configurable="true">
         <icon>images/secretwarden_hook_icon.png</icon>
         <description>Require repository administrator to merge pull-request if possible secrets are identified</description>

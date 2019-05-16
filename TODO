@@ -1,6 +1,3 @@
-[] Implement MatchSecretRuleSet
-[] Implement matching logic FoundSecretCollector
 [] Introduce an intermediary for UI & Merge Check to avoid duplicate work
 [] Implement FoundSecretsOverviewUI
-
 [] Create global administrator configuration page to enable & disable rules.

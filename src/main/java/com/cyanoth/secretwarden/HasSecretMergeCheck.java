@@ -35,29 +35,28 @@ public class HasSecretMergeCheck implements RepositoryMergeCheck {
                                           @Nonnull PullRequestMergeHookRequest request) {
 
         try {
-            // TODO: load the matched secret rule set & pass it to PullRequestSecretScanner
+            FindSecretRuleSet.reloadRuleSet(); // TODO: REMOVE ME !!1 TESTING ONLY: This should be loaded once on plugin load / on config changes
 
             final PullRequest pullRequest = request.getPullRequest();
             final Repository repository = pullRequest.getToRef().getRepository();
 
             PullRequestSecretScanner scannedPullRequest = new PullRequestSecretScanner(pullRequestService).scan(pullRequest);
 
-            int foundSecretCount = scannedPullRequest.countFoundSecrets();
-            if (foundSecretCount > 0) {
+            int count = scannedPullRequest.countFoundSecrets();
+            if (count > 0) {
                 if (!permissionService.hasRepositoryPermission(repository, Permission.REPO_ADMIN)) {
-                    String summaryMsg = i18nService.createKeyedMessage("com.cyanoth.secretwarden.hassecretmergecheck.foundsecrets", foundSecretCount).toString();
-                    String instructionMsg = i18nService.getMessage("com.cyanoth.secretwarden.hassecretmergecheck.requireadmin");
-
-                    return RepositoryHookResult.rejected(summaryMsg, instructionMsg);
+                    String s =  (count > 1) ? "secrets" : "secret";
+                    return RepositoryHookResult.rejected(String.format("%d %s identified in this pull-request.", count, s),
+                            String.format("This PR contains %d %s, therefore only a repository admin may merge this pull request.", count, s));
                 }
             }
         }
         // If an exception occurs performing this merge check, don't block the pull request from being merged - just log that an error occurred.
         catch (ScanIncompleteException e) {
-            log.error(i18nService.getMessage("com.cyanoth.secretwarden.hassecretmergecheck.log.scanincomplete"));
+            log.error("ERROR: Attempted to retrieve secret scan results, but a scan has not been started yet!");
         }
         catch (Exception e) {
-            log.error(i18nService.createKeyedMessage("com.cyanoth.secretwarden.hassecretmergecheck.log.unknownexception", e.toString()).toString());
+            log.error("ERROR: Failed to check run HasSecretMergeCheck. Unknown Exception Occurred:" + e.toString()); //TODO: TRACEBACK
         }
 
         return RepositoryHookResult.accepted();

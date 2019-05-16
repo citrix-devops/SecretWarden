@@ -107,12 +107,6 @@
             <artifactId>gson</artifactId>
             <version>2.2.2-atlassian-1</version>
         </dependency>
-        <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations-java5</artifactId>
-            <version>RELEASE</version>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -138,7 +132,7 @@
 
                         <!-- Add package to export here -->
                         <Export-Package>
-                            com.mycompany.bitbucket.merge.checks.api,
+                            com.cyanoth.secretwarden,
                         </Export-Package>
 
                         <!-- Add package import here -->
