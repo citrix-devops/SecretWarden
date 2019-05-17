@@ -9,6 +9,8 @@
 
     <resource type="i18n" name="SecretWarden" location="com.cyanoth.secretwarden"/>
 
+
+    <!-- Merge Check Resources -->
     <repository-merge-check key="has-secret-pr-merge-check" name="Prevent Merged Secrets" class="bean:HasSecretMergeCheck" configurable="true">
         <icon>images/secretwarden_hook_icon.png</icon>
         <description>Require repository administrator to merge pull-request if possible secrets are identified</description>
@@ -17,4 +19,21 @@
             <scope>repository</scope>
         </scopes>
     </repository-merge-check>
+
+
+    <!-- Pull-request user interface for SecretWarden Overview Resources -->
+    <client-resource key="secret-warden-pr-overview-resources" name="Pull Request Overview Resources">
+        <directory location="/js/" />
+        <directory location="/soy/" />
+
+        <dependency>com.atlassian.auiplugin:ajs</dependency>
+        <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:pull-request-web-panels</dependency>
+    </client-resource>
+
+    <client-web-panel name="SecretWarden Scan Results" key="secretwarden-pr-overview" location="bitbucket.pull-request.related-entities" weight="2050">
+        <resource name="view" type="soy" location="com.cyanoth.secretwarden:secret-warden-pr-overview-resources/com.cyanoth.secretwarden.proverviewui.panel" />
+        <dependency>com.cyanoth.secretwarden:pr-overview-resources</dependency>
+    </client-web-panel>
+
+
 </atlassian-plugin>
