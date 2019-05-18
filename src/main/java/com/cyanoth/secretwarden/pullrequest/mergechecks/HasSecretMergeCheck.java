@@ -1,12 +1,13 @@
-package com.cyanoth.secretwarden;
+package com.cyanoth.secretwarden.pullrequest.mergechecks;
 
 import com.atlassian.bitbucket.hook.repository.*;
-import com.atlassian.bitbucket.i18n.I18nService;
 import com.atlassian.bitbucket.permission.Permission;
 import com.atlassian.bitbucket.permission.PermissionService;
 import com.atlassian.bitbucket.pull.*;
 import com.atlassian.bitbucket.repository.Repository;
 import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
+import com.cyanoth.secretwarden.pullrequest.SecretScanner;
+import com.cyanoth.secretwarden.structures.FoundSecretCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,13 +19,10 @@ import javax.annotation.Nonnull;
 public class HasSecretMergeCheck implements RepositoryMergeCheck {
     private static final Logger log = LoggerFactory.getLogger(HasSecretMergeCheck.class);
     private final PermissionService permissionService;
-    private final I18nService i18nService;
     private final PullRequestService pullRequestService;
     @Autowired
-    public HasSecretMergeCheck(@ComponentImport I18nService i18nService,
-                               @ComponentImport PermissionService permissionService,
+    public HasSecretMergeCheck(@ComponentImport PermissionService permissionService,
                                @ComponentImport PullRequestService pullRequestService) {
-        this.i18nService = i18nService;
         this.permissionService = permissionService;
         this.pullRequestService = pullRequestService;
     }
@@ -35,14 +33,12 @@ public class HasSecretMergeCheck implements RepositoryMergeCheck {
                                           @Nonnull PullRequestMergeHookRequest request) {
 
         try {
-            FindSecretRuleSet.reloadRuleSet(); // TODO: REMOVE ME !!1 TESTING ONLY: This should be loaded once on plugin load / on config changes
-
             final PullRequest pullRequest = request.getPullRequest();
             final Repository repository = pullRequest.getToRef().getRepository();
 
-            PullRequestSecretScanner scannedPullRequest = new PullRequestSecretScanner(pullRequestService).scan(pullRequest);
+            FoundSecretCollection pullRequestScan = new SecretScanner(pullRequestService).scan(pullRequest,false);
 
-            int count = scannedPullRequest.countFoundSecrets();
+            int count = pullRequestScan.count();
             if (count > 0) {
                 if (!permissionService.hasRepositoryPermission(repository, Permission.REPO_ADMIN)) {
                     String s =  (count > 1) ? "secrets" : "secret";
@@ -52,9 +48,6 @@ public class HasSecretMergeCheck implements RepositoryMergeCheck {
             }
         }
         // If an exception occurs performing this merge check, don't block the pull request from being merged - just log that an error occurred.
-        catch (ScanIncompleteException e) {
-            log.error("ERROR: Attempted to retrieve secret scan results, but a scan has not been started yet!");
-        }
         catch (Exception e) {
             log.error("ERROR: Failed to check run HasSecretMergeCheck. Unknown Exception Occurred:" + e.toString()); //TODO: TRACEBACK
         }

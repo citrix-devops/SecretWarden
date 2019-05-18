@@ -1,40 +1,52 @@
 (function($) {
     // Set up our namespace
     window.SecretWarden = window.SecretWarden || {};
-    SecretWarden.PROverviewUI = SecretWarden.PROverviewUI || {};
+    SecretWarden.PullRequestUI = SecretWarden.PullRequestUI || {};
 
+     function reloadContext(context) {
 
-    console.log("start2");
-    $('.com.cyanoth.secretwarden.proverviewui.link').replaceWith(com.cyanoth.secretwarden.panel());
-    console.log("start3");
-
-    SecretWarden.PROverviewUI._pullRequestIsOpen = function(context) {
-        var pr = context['pullRequest'];
-        return pr.state === 'OPEN';
-    };
+     }
 
     function showDialog() {
-        var dialog = showDialog._dialog;
-        if (!dialog) {
-            dialog = showDialog._dialog = new AJS.dialog2()
-                .addHeader("Secret Warden - Identified Secrets")
-                .addPanel("Scan Results")
-                .addCancel("Close", function() {
-                    dialog.hide();
-                });
-        }
-
-        dialog.getCurrentPanel().body.html("<p> Hello World! </p>");
-        dialog.show().updateHeight();
+        dialog = AJS.dialog2($(com.cyanoth.secretwarden.overviewDialog()));
+        dialog.show();
     }
 
-    $(document).on('click', 'com.cyanoth.secretwarden.proverviewui.link', function(e) {
+    function doSomething() {
+                  console.log("HERE IN doSOMETHING");
+         var count_test = 15;
+         var ele = $(".secretwarden-overview-link");
+         var elelink = $(".secretwarden-overview-link a");
+
+
+         if (count_test >=0) {
+            ele.removeClass("incomplete");
+         }
+
+        if (count_test > 0) {
+            ele.addClass("hassecrets");
+            $(".secretwarden-overview-link .label").text(count_test + " secrets found");
+
+        } else if (count_test === 0) {
+            ele.addClass("nosecrets");
+
+
+            //$('a').contents().unwrap();
+
+
+            elelink.replaceWith(function() {
+             return $('span', this);
+            });
+
+            $(".secretwarden-overview-link .label").text("No secrets found")
+        }
+    }
+
+   $(document).on('click', '.secretwarden-overview-link', function(e) {
         e.preventDefault();
-        showDialog();
+        doSomething()
     });
 
-
-
-
+// CHECKME: Do we need document.ready() or is the context pass enough???
 }(AJS.$));
 

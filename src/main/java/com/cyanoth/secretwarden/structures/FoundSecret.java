@@ -1,4 +1,4 @@
-package com.cyanoth.secretwarden;
+package com.cyanoth.secretwarden.structures;
 
 import javax.annotation.Nullable;
 
@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
  *  Intentionally immutable after initialization.
  */
 public class FoundSecret {
-
     private String matchedRuleName;
     private String destinationFilePath = null;
     private String sourceContext = null;
@@ -25,7 +24,7 @@ public class FoundSecret {
         this.destLine = destLine;
     }
 
-    FoundSecret(String matchedRuleName, String destinationFilePath, String sourceContext, int sourceLine, int destLine) {
+    public FoundSecret(String matchedRuleName, String destinationFilePath, String sourceContext, int sourceLine, int destLine) {
         this.matchedRuleName = matchedRuleName;
         this.destinationFilePath = destinationFilePath;
         this.sourceContext = sourceContext;

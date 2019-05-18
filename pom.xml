@@ -88,6 +88,11 @@
             <version>1</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.atlassian.cache</groupId>
+            <artifactId>atlassian-cache-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- WIRED TEST RUNNER DEPENDENCIES -->
         <dependency>

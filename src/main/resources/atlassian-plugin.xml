@@ -7,13 +7,11 @@
         <param name="plugin-logo">images/pluginLogo.png</param>
     </plugin-info>
 
-    <resource type="i18n" name="SecretWarden" location="com.cyanoth.secretwarden"/>
-
 
     <!-- Merge Check Resources -->
-    <repository-merge-check key="has-secret-pr-merge-check" name="Prevent Merged Secrets" class="bean:HasSecretMergeCheck" configurable="true">
-        <icon>images/secretwarden_hook_icon.png</icon>
-        <description>Require repository administrator to merge pull-request if possible secrets are identified</description>
+    <repository-merge-check key="has-secret-pr-merge-check" name="Prevent Merging Secrets" class="bean:HasSecretMergeCheck" configurable="true">
+        <icon>images/secretwarden_hook_alticon.png</icon>
+        <description>Require a repository administrator to merge pull-request if the pull request contains secrets</description>
         <scopes>
             <!-- <scope>project</scope> -->
             <scope>repository</scope>
@@ -22,17 +20,20 @@
 
 
     <!-- Pull-request user interface for SecretWarden Overview Resources -->
-    <client-resource key="secret-warden-pr-overview-resources" name="Pull Request Overview Resources">
-        <directory location="/js/" />
-        <directory location="/soy/" />
-
+    <client-resource key="secretwarden-pullrequest-ui-res" name="Resources: Pull Request Overview Panel Dependencies">
+        <description>Dependencies for the UI panel in the pull request which displays found secrets</description>
+        <resource type="download" name="secretwarden-pr-overview.soy.js" location="/soy/secretwarden-pr-overview.soy"/>
+        <resource type="download" name="secretwarden-pr-overview.js" location="/js/secretwarden-pr-overview.js"/>
+        <resource type="download" name="secretwarden-pr-overview.css" location="/css/secretwarden-pr-overview.css"/>
         <dependency>com.atlassian.auiplugin:ajs</dependency>
         <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:pull-request-web-panels</dependency>
     </client-resource>
 
-    <client-web-panel name="SecretWarden Scan Results" key="secretwarden-pr-overview" location="bitbucket.pull-request.related-entities" weight="2050">
-        <resource name="view" type="soy" location="com.cyanoth.secretwarden:secret-warden-pr-overview-resources/com.cyanoth.secretwarden.proverviewui.panel" />
-        <dependency>com.cyanoth.secretwarden:pr-overview-resources</dependency>
+    <client-web-panel name="Interface: Pull Request Overview Panel" key="secretwarden-pullrequest-ui" location="bitbucket.pull-request.related-entities" weight="2050">
+        <resource name="view" type="soy" location="com.cyanoth.secretwarden:secretwarden-pullrequest-ui-res/com.cyanoth.secretwarden.panel" />
+        <description>Summary of the found secret scan results on the overview page of a pull request.</description>
+        <client-context-provider>SecretWarden.PullRequestUI.reloadContext</client-context-provider>
+        <dependency>com.cyanoth.secretwarden:secretwarden-pullrequest-ui-res</dependency>
     </client-web-panel>
 
 
