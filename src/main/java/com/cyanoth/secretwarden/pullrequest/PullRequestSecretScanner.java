@@ -44,10 +44,17 @@ public class PullRequestSecretScanner implements SecretScanner {
                     log.debug(String.format("SecretWarden has already scanned the pull request: %s (ID: %d) and found %d secret(s).",
                         pullRequest.getFromRef(), pullRequest.getId(), scan.countFoundSecrets()));
                     return scan;
+                } else {
+                    log.debug(String.format("SecretWarden has already scanned the pull request: %s (ID: %d) but the information is out of date." +
+                            "Will rescan", pullRequest.getFromRef(), pullRequest.getId()));
                 }
             }
 
-            // IMPROVEME: It may be worth considering putting a cluster lock here so that only one node will run a secret scan at a time.
+            long scanStartTime = 0;
+            if (log.isDebugEnabled())
+                scanStartTime = System.currentTimeMillis();
+
+            // IMPROVE_ME: It may be worth considering putting a cluster lock here so that only one node will run a secret scan at a time.
             // At present, if two (or more) user's view a pull-request that hasn't been scanned or it is still in-progress and the user's are on
             // different nodes, then a scan will be executed on each node. Due to replicated cache, it shouldn't be a problem if more than one node
             // does the scan at the same time and ultimately, reports results at different times. Its just this is a unnecessary waste of resources.
@@ -58,6 +65,13 @@ public class PullRequestSecretScanner implements SecretScanner {
             pullRequestSecretScanCache.put(pullRequest, scan);
             log.info(String.format("SecretWarden scanned the pull request: %s (ID: %d) and has found %d secret(s).",
                                     pullRequest.getFromRef(), pullRequest.getId(), scan.countFoundSecrets()));
+
+            if (log.isDebugEnabled()) {
+                long elaspedTime = System.currentTimeMillis() - scanStartTime;
+                log.debug(String.format("SecretWarden took %d milliseconds to scan the pull request: %s (ID %d)",
+                        elaspedTime, pullRequest.getFromRef(), pullRequest.getId()));
+            }
+
             return scan;
         }
         catch (Exception e) {
