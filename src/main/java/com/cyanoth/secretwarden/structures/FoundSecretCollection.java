@@ -1,10 +1,11 @@
 package com.cyanoth.secretwarden.structures;
 
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 
-public class FoundSecretCollection {
+public class FoundSecretCollection implements Serializable {
 
     private final Collection<FoundSecret> foundSecrets;
 

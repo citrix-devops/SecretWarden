@@ -1,12 +1,13 @@
 package com.cyanoth.secretwarden.structures;
 
 import javax.annotation.Nullable;
+import java.io.Serializable;
 
 /**
  *  Details about a single found secret. Assume that not all properties will be available.
  *  Intentionally immutable after initialization.
  */
-public class FoundSecret {
+public class FoundSecret implements Serializable {
     private String matchedRuleName;
     private String destinationFilePath = null;
     private String sourceContext = null;
