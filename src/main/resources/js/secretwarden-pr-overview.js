@@ -1,3 +1,26 @@
+define('SecretWarden/PullRequestUIOverview', [
+        'jquery',
+        'bitbucket/util/events',
+        'bitbucket/util/navbuilder',
+        'bitbucket/util/server',
+        'bitbucket/util/state',
+        'aui/flag',
+        'exports'
+    ], function(
+        $,
+        events,
+        nav,
+        server,
+        state,
+        flag,
+        exports) {
+    'use strict';
+
+
+}
+
+
+
 (function($) {
     // Set up our namespace
     window.SecretWarden = window.SecretWarden || {};
@@ -13,7 +36,6 @@
     }
 
     function doSomething() {
-                  console.log("HERE IN doSOMETHING");
          var count_test = 15;
          var ele = $(".secretwarden-overview-link");
          var elelink = $(".secretwarden-overview-link a");
@@ -31,9 +53,6 @@
             ele.addClass("nosecrets");
 
 
-            //$('a').contents().unwrap();
-
-
             elelink.replaceWith(function() {
              return $('span', this);
             });
@@ -49,4 +68,3 @@
 
 // CHECKME: Do we need document.ready() or is the context pass enough???
 }(AJS.$));
-

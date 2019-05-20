@@ -1,22 +1,42 @@
-[] Introduce an intermediary for UI & Merge Check to avoid duplicate work
-[] Implement FoundSecretsOverviewUI
-[] Create global administrator configuration page to enable & disable rules.
 
-[] cache results. either in fs / database. with latest commit & PR note.
-[] conditions for showing.
 
- // IMPROVE_ME: With this logic, the secret will be "somewhere in file /src/foo.java between lines 12 to 35". Better if this can be an exact line number.
+1)
+[ ] Finish Rest API for PR data
+[ ] UI Overview
 
- // configuration options:
-    -> Administrators can merge pull requests containing secrets (recommended)
-    -> Verbose time taken logging.
-    -> Use Alternative Merge Check Icon
+----
+
+3)
+[ ] Global Administrator Configuration Page
+
+    -> Webhook (post to slack channel on secret added)
 
     -> Rule set (table where administrator can edit)
 
-    This will be readonly at project/repo level but writing at global config (add a fail safe to ADMIN permission)
+    -> Clear Cache Button
 
- // TIMING (How long it takes from start to finish)
+-----
+
+4)
+[ ] Conditions for Showing (only on open pull requests)
 
 
- Consider i18nService
+
+-----
+
+5)
+[  ] Tidy Up
+[  ] Code Comments
+
+------
+
+6)
+[ ] Read Me
+
+
+IMPROVE_ME's
+
+ // IMPROVE_ME: With this logic, the secret will be "somewhere in file /src/foo.java between lines 12 to 35". Better if this can be an exact line number.
+ i18nService
+ Cluster Locking
+ REST Model

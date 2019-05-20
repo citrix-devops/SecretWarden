@@ -9,6 +9,7 @@ import com.atlassian.plugin.spring.scanner.annotation.component.Scanned;
 import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
 
 import com.cyanoth.secretwarden.SecretScanException;
+import com.cyanoth.secretwarden.config.MatchRuleSetCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,20 +20,20 @@ import javax.annotation.Nonnull;
 @Scanned
 public class HasSecretMergeCheck implements RepositoryMergeCheck {
     private static final Logger log = LoggerFactory.getLogger(HasSecretMergeCheck.class);
-
-    private final PullRequestSecretScanResultCache pullRequestSecretScanCache;
-
     private final PermissionService permissionService;
     private final PullRequestService pullRequestService;
-
+    private final PullRequestSecretScanResultCache pullRequestSecretScanResultCache;
+    private final MatchRuleSetCache matchRuleSetCache;
 
     @Autowired
     public HasSecretMergeCheck(@ComponentImport PermissionService permissionService,
                                @ComponentImport PullRequestService pullRequestService,
-                               final PullRequestSecretScanResultCache pullRequestSecretScanResultCache) {
+                               final PullRequestSecretScanResultCache pullRequestSecretScanResultCache,
+                               final MatchRuleSetCache matchRuleSetCache) {
         this.permissionService = permissionService;
         this.pullRequestService = pullRequestService;
-        this.pullRequestSecretScanCache = pullRequestSecretScanResultCache;  //OSGi Service
+        this.pullRequestSecretScanResultCache = pullRequestSecretScanResultCache;
+        this.matchRuleSetCache = matchRuleSetCache;
     }
 
     @Nonnull
@@ -44,8 +45,8 @@ public class HasSecretMergeCheck implements RepositoryMergeCheck {
             final PullRequest pullRequest = request.getPullRequest();
             final Repository repository = pullRequest.getToRef().getRepository();
 
-            PullRequestSecretScanResult pullRequestScan = new PullRequestSecretScanner(pullRequestService,
-                    pullRequest,pullRequestSecretScanCache).scan(false);
+            PullRequestSecretScanResult pullRequestScan = new PullRequestSecretScanner(pullRequestService, pullRequest,
+                    pullRequestSecretScanResultCache, matchRuleSetCache).scan(false);
 
             int secretCount = pullRequestScan.countFoundSecrets();
             if (secretCount > 0) {
@@ -58,9 +59,9 @@ public class HasSecretMergeCheck implements RepositoryMergeCheck {
         }
         // If an exception occurs performing this merge check, don't block the pull request from being merged - just log the exception that occurred.
         catch (SecretScanException e) {
-           log.error("ERROR: HasSecretMergeCheck has failed before the secret scan has failed. Exception: ", e);
+           log.error("ERROR: HasSecretMergeCheck failed whilst performing a secret scan. Exception: ", e);
         }
-        // Fail-safe, catch anything here intentionally so it bubble-up any further
+        // Fail-safe, catch anything here intentionally so it doesn't bubble-up any further
         catch (Exception e) {
             log.error("ERROR: HasSecretMergeCheck has check for secrets. An unexpected exception occurred: ", e);
         }

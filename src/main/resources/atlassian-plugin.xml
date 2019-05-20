@@ -36,5 +36,8 @@
         <dependency>com.cyanoth.secretwarden:secretwarden-pullrequest-ui-res</dependency>
     </client-web-panel>
 
+    <rest name="SecretWarden REST API" key="secretwarden-rest-resources" path="/secretwarden" version="1.0">
+        <description>Description goes here</description>
+    </rest>
 
 </atlassian-plugin>
