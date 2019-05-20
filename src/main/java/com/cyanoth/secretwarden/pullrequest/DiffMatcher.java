@@ -37,10 +37,14 @@ class DiffMatcher extends AbstractDiffContentCallback {
     // We must keep this information incase of a matched secret at the end of the callback flow.
     private String destinationFilePath = null;
     private String sourceContext = null;
-    private int sourceLine = -1;
-    private int destinationLine = -1;
+    private int startSourceLine = -1;
+    private int endSourceLine = -1;
 
 
+    /**
+     * INTERNAL: Finds & collect secrets that match rules in the ruleset in a given hunk of changes.
+     * @param matchRuleSet Collection of rules to find secrets in text.
+     */
     DiffMatcher(MatchRuleSet matchRuleSet) {
         this.matchRuleSet = matchRuleSet;
     }
@@ -54,8 +58,8 @@ class DiffMatcher extends AbstractDiffContentCallback {
 
     @Override
     public void onHunkStart(int srcLine, int srcSpan, int dstLine, int dstSpan, @Nullable String context) {
-        sourceLine = srcLine;
-        destinationLine  = dstLine;
+        startSourceLine = dstLine;
+        endSourceLine  = dstLine + dstSpan; // Example: This hunk ranges from line 32 - 64
         sourceContext = context;
     }
 
@@ -67,7 +71,7 @@ class DiffMatcher extends AbstractDiffContentCallback {
         for (MatchRule rule : matchRuleSet.getAllRules()) {
             if (rule.getRegexPattern().matcher(s).matches()) {
                 foundSecrets.add(new FoundSecret(rule.getFriendlyName(), destinationFilePath,
-                        sourceContext, sourceLine, destinationLine));
+                        sourceContext, startSourceLine, endSourceLine));
             }
         }
     }
@@ -78,6 +82,9 @@ class DiffMatcher extends AbstractDiffContentCallback {
         flagScanSegment = type == DiffSegmentType.ADDED;
     }
 
+    /*
+     * @return Collection of secrets (text + metadata) that matched in the scanned difference
+     */
     FoundSecretCollection getFoundSecrets() {
         return foundSecrets;
     }

@@ -59,6 +59,9 @@ public class PullRequestSecretScanResultCache {
         cache().put(genCacheKey(projectKey, repoSlug, pullRequestId), scanResult);
     }
 
+    public void clear() {
+        cache().removeAll();
+    }
 
     @NotNull
     private String genCacheKey(String projectKey, String repoSlug, Long pullRequestId) {

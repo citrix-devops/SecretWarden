@@ -26,13 +26,27 @@
         <resource type="download" name="secretwarden-pr-overview.js" location="/js/secretwarden-pr-overview.js"/>
         <resource type="download" name="secretwarden-pr-overview.css" location="/css/secretwarden-pr-overview.css"/>
         <dependency>com.atlassian.auiplugin:ajs</dependency>
+        <dependency>com.atlassian.bitbucket.server.bitbucket-web:global</dependency>
         <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:pull-request-web-panels</dependency>
+        <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:amd</dependency>
+        <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:aui</dependency>
+        <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:state</dependency>
+        <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:jquery</dependency>
+        <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:navbuilder</dependency>
     </client-resource>
 
     <client-web-panel name="Interface: Pull Request Overview Panel" key="secretwarden-pullrequest-ui" location="bitbucket.pull-request.related-entities" weight="2050">
-        <resource name="view" type="soy" location="com.cyanoth.secretwarden:secretwarden-pullrequest-ui-res/com.cyanoth.secretwarden.panel" />
         <description>Summary of the found secret scan results on the overview page of a pull request.</description>
-        <client-context-provider>SecretWarden.PullRequestUI.reloadContext</client-context-provider>
+
+
+        <resource name="view" type="soy" location="com.cyanoth.secretwarden:secretwarden-pullrequest-ui-res/com.cyanoth.secretwarden.panel" />
+        <client-context-provider>require('SecretWarden/PullRequestUIOverview').showSecretScanPROverview</client-context-provider>
+        <!--<client-condition></client-condition>-->
+
+
+
+
+
         <dependency>com.cyanoth.secretwarden:secretwarden-pullrequest-ui-res</dependency>
     </client-web-panel>
 

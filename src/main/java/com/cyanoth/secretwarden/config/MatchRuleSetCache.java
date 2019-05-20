@@ -24,17 +24,17 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * This class simply uses Atlassian Cache API to cache one instance of MatchRuleSet (identified by the key: RULESET_KEY)
- * With this logic, we can ensure that the ruleset is replicated across all nodes in the cluster even on update.
+ * Exposed OSGi Service which uses the Atlassian Cache API to cache a single instance of MatchRuleSet (identified by the key: RULESET_KEY)
+ * With this, we can ensure that the loaded ruleset is replicated across all nodes in the cluster even after it has been updated by configuration changes.
  */
 @Component
 public class MatchRuleSetCache {
     private static final Logger log = LoggerFactory.getLogger(MatchRuleSetCache.class);
     private final String RULESET_KEY = "MatchSecretRuleSet";
+    private final String CACHE_NAME = "com.cyanoth.secretwarden:MatchRuleSetCache";
     private final CacheFactory cacheFactory;
     private final CacheSettings cacheSettings;
-
-    private Cache<String, MatchRuleSet> _matchRuleSet = null; // Use cache() for access
+    private Cache<String, MatchRuleSet> _matchRuleSet = null; // Use cache() for access, even inner class
 
     @Autowired
     public MatchRuleSetCache(@ComponentImport final CacheFactory cacheFactory) {
@@ -43,25 +43,27 @@ public class MatchRuleSetCache {
                 replicateViaCopy().build();
     }
 
-
     private Cache<String, MatchRuleSet> cache() {
         synchronized (this) {
             if (this._matchRuleSet == null) {
-                final String CACHE_NAME = "com.cyanoth.secretwarden:MatchRuleSetCache";
                 this._matchRuleSet = this.cacheFactory.getCache(CACHE_NAME, null, cacheSettings);
                 reloadRuleSet();
-                log.debug("SecretWarden: MatchRuleSetCache initialised!");
+                log.debug("SecretWarden: A new cache object has been initialised for MatchRuleSet!");
             }
             return this._matchRuleSet;
         }
     }
 
+    /**
+     * @return MatchRuleSet A collection of match secret rules loaded previous and stored in the cache
+     */
     public MatchRuleSet getRuleSet() {
         return cache().get(RULESET_KEY);
     }
 
     /**
-     * Reload the loaded ruleset.
+     * Reloads the ruleset from default plugin & user configuration rules. Incase of failure, the old ruleset is kept.
+     * @return True - Rule set reload. False on error, the ruleset wasn't reloaded.
      */
     public boolean reloadRuleSet() {
         log.info("Reloading SecretWarden Ruleset");
@@ -79,7 +81,6 @@ public class MatchRuleSetCache {
         }
         catch (RuleSetLoadException e) {
             log.error(String.format("Failed to reload SecretWarden ruleset.\nAn exception has occurred: %s", e.getMessage()));
-            // Do not replace the current ruleset on error.
             return false;
         }
     }

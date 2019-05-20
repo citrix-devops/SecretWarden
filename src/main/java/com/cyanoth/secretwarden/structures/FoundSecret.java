@@ -11,26 +11,26 @@ public class FoundSecret implements Serializable {
     private String matchedRuleName;
     private String destinationFilePath = null;
     private String sourceContext = null;
-    private int sourceLine = -1;
-    private int destLine = -1;
+    private int startSourceLine = -1;
+    private int endSourceLine = -1;
 
     FoundSecret(String matchedRuleName) {
         this.matchedRuleName = matchedRuleName;
     }
 
-    FoundSecret(String matchedRuleName, String destinationFilePath, int sourceLine, int destLine) {
+    FoundSecret(String matchedRuleName, String destinationFilePath, int startSourceLine, int endSourceLine) {
         this.matchedRuleName = matchedRuleName;
         this.destinationFilePath = destinationFilePath;
-        this.sourceLine = sourceLine;
-        this.destLine = destLine;
+        this.startSourceLine = startSourceLine;
+        this.endSourceLine = endSourceLine;
     }
 
-    public FoundSecret(String matchedRuleName, String destinationFilePath, String sourceContext, int sourceLine, int destLine) {
+    public FoundSecret(String matchedRuleName, String destinationFilePath, String sourceContext, int startSourceLine, int endSourceLine) {
         this.matchedRuleName = matchedRuleName;
         this.destinationFilePath = destinationFilePath;
         this.sourceContext = sourceContext;
-        this.sourceLine = sourceLine;
-        this.destLine = destLine;
+        this.startSourceLine = startSourceLine;
+        this.endSourceLine = endSourceLine;
     }
 
 
@@ -38,12 +38,12 @@ public class FoundSecret implements Serializable {
         return matchedRuleName;
     }
 
-    public int getSourceLine() {
-        return sourceLine;
+    public int getStartSourceLine() {
+        return startSourceLine;
     }
 
-    public int getDestLine() {
-        return destLine;
+    public int getEndSourceLine() {
+        return endSourceLine;
     }
 
     @Nullable
@@ -65,8 +65,8 @@ public class FoundSecret implements Serializable {
         if (sourceContext != null)
             builder += String.format(" Context: %s", sourceContext);
 
-        if (sourceLine != 1 && destLine != 1)
-            builder += String.format(" Between Lines: %d - %d", sourceLine, destLine);
+        if (startSourceLine != 1 && endSourceLine != 1)
+            builder += String.format(" Between Lines: %d - %d", startSourceLine, endSourceLine);
 
         return builder;
     }
