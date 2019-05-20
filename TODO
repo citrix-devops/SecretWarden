@@ -1,25 +1,19 @@
 
-3)
+1)
 [ ] Global Administrator Configuration Page
-
-    -> Webhook (post to slack channel on secret added)
-
-    -> Rule set (table where administrator can edit)
 
     -> Clear Cache Button
 
+    -> Rule set (table where administrator can edit)
+
+
 -----
 
-4)
+2)
 [ ] Conditions for Showing (only on open pull requests)
 
 
-
------
-
-5)
-[  ] Tidy Up
-[  ] Code Comments
+[ ] Verify Pull Request UI overview logic
 
 ------
 
@@ -27,9 +21,13 @@
 [ ] Read Me
 
 
-IMPROVE_ME's
+IMPROVE_ME:
 
- // IMPROVE_ME: With this logic, the secret will be "somewhere in file /src/foo.java between lines 12 to 35". Better if this can be an exact line number.
- i18nService
- Cluster Locking
- REST Model
+ // IMPROVE_ME: With current logic, The secret will be "somewhere in file /src/foo.java between lines 12 to 35". It would be better if this can be an exact line number.
+                and EVEN better if this could somehow use Code Insights Annotations - to mark on the actual diff page.
+
+ // IMPROVE_ME:  Cluster Locking
+
+ // IMPROVE_ME:  i18nService
+
+ // IMPROVE_ME:  REST Model

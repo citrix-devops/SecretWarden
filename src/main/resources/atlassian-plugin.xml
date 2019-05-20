@@ -38,17 +38,33 @@
     <client-web-panel name="Interface: Pull Request Overview Panel" key="secretwarden-pullrequest-ui" location="bitbucket.pull-request.related-entities" weight="2050">
         <description>Summary of the found secret scan results on the overview page of a pull request.</description>
 
-
         <resource name="view" type="soy" location="com.cyanoth.secretwarden:secretwarden-pullrequest-ui-res/com.cyanoth.secretwarden.panel" />
         <client-context-provider>require('SecretWarden/PullRequestUIOverview').showSecretScanPROverview</client-context-provider>
         <!--<client-condition></client-condition>-->
 
-
-
-
-
         <dependency>com.cyanoth.secretwarden:secretwarden-pullrequest-ui-res</dependency>
     </client-web-panel>
+
+
+    <client-resource key="secretwarden-globalconfig-ui-res" name="Resources: Global Configuration Dependencies">
+        <description>Dependencies</description>
+        <resource type="download" name="secretwarden-global-config.soy.js" location="/soy/secretwarden-global-config.soy"/>
+        <resource type="download" name="secretwarden-gloabl-config.js" location="/js/secretwarden-global-config.js"/>
+        <client-context-provider>require('SecretWarden/GlobalConfig').loadPage</client-context-provider>
+        <dependency>com.atlassian.auiplugin:ajs</dependency>
+        <dependency>com.atlassian.bitbucket.server.bitbucket-web:global</dependency>
+        <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:amd</dependency>
+        <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:aui</dependency>
+        <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:state</dependency>
+        <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:jquery</dependency>
+        <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:navbuilder</dependency>
+    </client-resource>
+
+    <servlet key="secretwarden-globalconfig-servlet" class="com.cyanoth.secretwarden.config.UI.GlobalConfigServlet">
+        <url-pattern>/secretwarden/globalconfig</url-pattern>
+        <dependency>com.cyanoth.secretwarden:secretwarden-globalconfig-ui-res</dependency>
+
+    </servlet>
 
     <rest name="SecretWarden REST API" key="secretwarden-rest-resources" path="/secretwarden" version="1.0">
         <description>Description goes here</description>

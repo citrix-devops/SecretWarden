@@ -4,8 +4,8 @@ import com.atlassian.bitbucket.content.AbstractChangeCallback;
 import com.atlassian.bitbucket.content.Change;
 import com.atlassian.bitbucket.content.ChangeType;
 import com.atlassian.bitbucket.pull.*;
-import com.cyanoth.secretwarden.FoundSecretCollection;
-import com.cyanoth.secretwarden.MatchRuleSet;
+import com.cyanoth.secretwarden.collections.FoundSecretCollection;
+import com.cyanoth.secretwarden.collections.MatchRuleSet;
 
 import javax.annotation.Nonnull;
 import javax.validation.constraints.NotNull;

@@ -4,8 +4,8 @@ import com.atlassian.bitbucket.content.AbstractDiffContentCallback;
 import com.atlassian.bitbucket.content.ConflictMarker;
 import com.atlassian.bitbucket.content.DiffSegmentType;
 import com.atlassian.bitbucket.content.Path;
-import com.cyanoth.secretwarden.FoundSecretCollection;
-import com.cyanoth.secretwarden.MatchRuleSet;
+import com.cyanoth.secretwarden.collections.FoundSecretCollection;
+import com.cyanoth.secretwarden.collections.MatchRuleSet;
 import com.cyanoth.secretwarden.structures.FoundSecret;
 import com.cyanoth.secretwarden.structures.MatchRule;
 

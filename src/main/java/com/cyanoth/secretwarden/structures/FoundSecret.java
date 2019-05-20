@@ -4,8 +4,7 @@ import javax.annotation.Nullable;
 import java.io.Serializable;
 
 /**
- *  Details about a single found secret. Assume that not all properties will be available.
- *  Intentionally immutable after initialization.
+ *  Details about a single found secret. Intentionally immutable after initialization.
  */
 public class FoundSecret implements Serializable {
     private String matchedRuleName;

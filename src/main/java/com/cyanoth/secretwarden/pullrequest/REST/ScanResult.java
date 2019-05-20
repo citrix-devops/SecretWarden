@@ -1,14 +1,17 @@
-package com.cyanoth.secretwarden.pullrequest.rest;
+package com.cyanoth.secretwarden.pullrequest.REST;
 
-import com.atlassian.bitbucket.permission.PermissionService;
 import com.atlassian.plugin.spring.scanner.annotation.component.Scanned;
+import com.atlassian.sal.api.user.UserManager;
 import com.cyanoth.secretwarden.pullrequest.PullRequestSecretScanResult;
 import com.cyanoth.secretwarden.pullrequest.PullRequestSecretScanResultCache;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -17,11 +20,11 @@ import javax.ws.rs.core.Response;
 public class ScanResult{
     private static final Logger log = LoggerFactory.getLogger(ScanResult.class);
     private final PullRequestSecretScanResultCache pullRequestSecretScanResultCache;
-    private final PermissionService permissionService;
+    private final UserManager userManager;
 
-    ScanResult(PullRequestSecretScanResultCache pullRequestSecretScanResultCache, PermissionService permissionService) {
+    ScanResult(PullRequestSecretScanResultCache pullRequestSecretScanResultCache, UserManager userManager) {
         this.pullRequestSecretScanResultCache = pullRequestSecretScanResultCache;
-        this.permissionService = permissionService;
+        this.userManager = userManager;
     }
 
     /**
@@ -49,16 +52,4 @@ public class ScanResult{
             return Response.ok(resultAsJson).build();
         }
     }
-
-    @PUT
-    @Path("/clearcache")
-    public Response clearCache()
-    {
-
-        // TODO: This should require global administrator permission.
-
-        pullRequestSecretScanResultCache.clear();
-        return Response.ok("Cache Cleared!").build();
-    }
-
 }

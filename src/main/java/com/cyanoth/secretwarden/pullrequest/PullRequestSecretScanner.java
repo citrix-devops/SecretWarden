@@ -2,7 +2,7 @@ package com.cyanoth.secretwarden.pullrequest;
 
 import com.atlassian.bitbucket.pull.PullRequest;
 import com.atlassian.bitbucket.pull.PullRequestService;
-import com.cyanoth.secretwarden.MatchRuleSet;
+import com.cyanoth.secretwarden.collections.MatchRuleSet;
 import com.cyanoth.secretwarden.SecretScanException;
 import com.cyanoth.secretwarden.SecretScanStatus;
 import com.cyanoth.secretwarden.SecretScanner;

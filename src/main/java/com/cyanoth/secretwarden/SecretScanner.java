@@ -1,8 +1,9 @@
 package com.cyanoth.secretwarden;
 
+/**
+ * Interface which all secret scan varieties must implement (pull request scan, repository scan, branch scan etc.)
+ */
 public interface SecretScanner {
-
-    // Interface which will allows for possible future implementations such as scanning pull requests, branches, repositories.
 
     SecretScanResult scan(Boolean force) throws SecretScanException;
 

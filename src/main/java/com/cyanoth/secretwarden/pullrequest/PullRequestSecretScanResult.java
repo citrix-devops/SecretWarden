@@ -5,7 +5,7 @@ import com.cyanoth.secretwarden.SecretScanResult;
 import java.io.Serializable;
 import java.util.Date;
 
-@SuppressWarnings("WeakerAccess")
+
 public class PullRequestSecretScanResult extends SecretScanResult implements Serializable {
 
     private final Date pullRequestLastUpdated;

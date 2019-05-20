@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cyanoth</groupId>
     <artifactId>secretwarden</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
 
     <organization>
         <name>Cyanoth</name>
@@ -33,6 +33,11 @@
         <dependency>
             <groupId>com.atlassian.sal</groupId>
             <artifactId>sal-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.atlassian.soy</groupId>
+            <artifactId>soy-template-plugin</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -67,7 +72,6 @@
             <version>2.6</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>com.atlassian.plugin</groupId>
             <artifactId>atlassian-spring-scanner-annotation</artifactId>

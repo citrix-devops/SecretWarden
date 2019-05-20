@@ -5,7 +5,7 @@ import com.atlassian.cache.CacheFactory;
 import com.atlassian.cache.CacheSettings;
 import com.atlassian.cache.CacheSettingsBuilder;
 import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
-import com.cyanoth.secretwarden.MatchRuleSet;
+import com.cyanoth.secretwarden.collections.MatchRuleSet;
 import com.cyanoth.secretwarden.RuleSetLoadException;
 import com.cyanoth.secretwarden.structures.MatchRule;
 import com.google.gson.JsonArray;
@@ -37,7 +37,7 @@ public class MatchRuleSetCache {
     private Cache<String, MatchRuleSet> _matchRuleSet = null; // Use cache() for access, even inner class
 
     @Autowired
-    public MatchRuleSetCache(@ComponentImport final CacheFactory cacheFactory) {
+    public MatchRuleSetCache(@ComponentImport CacheFactory cacheFactory) {
         this.cacheFactory = cacheFactory;
         this.cacheSettings = new CacheSettingsBuilder().remote().
                 replicateViaCopy().build();
@@ -104,13 +104,11 @@ public class MatchRuleSetCache {
                 final JsonObject ruleObj = rule.getAsJsonObject();
 
                 try {
-                    if (!ruleObj.get("enabled").getAsBoolean()) //TODO: Check if this disabled in the config
-                        continue;
-
                     ruleCollector.add(new MatchRule(
                             ruleObj.get("rule_identifier").getAsString(),
                             ruleObj.get("friendly_name").getAsString(),
-                            ruleObj.get("regex_pattern").getAsString()));
+                            ruleObj.get("regex_pattern").getAsString(),
+                             ruleObj.get("enabled").getAsBoolean())); //TODO: Check if this disabled in the config
                 }
                 catch (Exception e) {
                     log.warn("An exception occurred trying to load a default rule: Exception", e);

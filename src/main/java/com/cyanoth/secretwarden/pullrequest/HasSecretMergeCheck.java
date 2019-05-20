@@ -28,8 +28,8 @@ public class HasSecretMergeCheck implements RepositoryMergeCheck {
     @Autowired
     public HasSecretMergeCheck(@ComponentImport PermissionService permissionService,
                                @ComponentImport PullRequestService pullRequestService,
-                               final PullRequestSecretScanResultCache pullRequestSecretScanResultCache,
-                               final MatchRuleSetCache matchRuleSetCache) {
+                               PullRequestSecretScanResultCache pullRequestSecretScanResultCache,
+                               MatchRuleSetCache matchRuleSetCache) {
         this.permissionService = permissionService;
         this.pullRequestService = pullRequestService;
         this.pullRequestSecretScanResultCache = pullRequestSecretScanResultCache;

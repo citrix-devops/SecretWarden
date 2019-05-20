@@ -1,4 +1,4 @@
-package com.cyanoth.secretwarden;
+package com.cyanoth.secretwarden.collections;
 
 import com.cyanoth.secretwarden.structures.MatchRule;
 import org.slf4j.Logger;
@@ -9,9 +9,8 @@ import java.util.Collection;
 import java.util.HashMap;
 
 /**
- * A collection of match secret rules (regex expression & identifier) that find secrets in the source code.
- * We implement Serializable to be cluster-safe. Ensuring that incase the ruleset is reloaded (config change) - every node will have the same config.
- * This class was originally static, which would have worked fine for Bitbucket Server but not Data Center.
+ * A collection of MatchRules (subsequently contains regex expression & identifier). These rules find matches in the source code.
+ * Must implement Serializable to be cluster-safe & ensuring that upon reload (config change) - every node will have the same ruleset.
  */
 public class MatchRuleSet implements Serializable {
     private static final Logger log = LoggerFactory.getLogger(MatchRuleSet.class);

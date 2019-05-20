@@ -1,4 +1,4 @@
-package com.cyanoth.secretwarden;
+package com.cyanoth.secretwarden.collections;
 
 import com.cyanoth.secretwarden.structures.FoundSecret;
 
@@ -7,6 +7,10 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 
+/**
+ * Collection of FoundSecret - that is, where in the source code a match was found & what was matched.
+ * Must implement Serializable to be cluster-safe & ability to replicate within scan results cache across the cluster
+ */
 public class FoundSecretCollection implements Serializable {
 
     private final Collection<FoundSecret> foundSecrets;
@@ -27,6 +31,10 @@ public class FoundSecretCollection implements Serializable {
         foundSecrets.addAll(secrets);
     }
 
+    /**
+     * Can be used to merge a smaller set of found secrets to a larger set
+     * @param secrets Another collection of secrets to merge to THIS object
+     */
     public void merge(@NotNull FoundSecretCollection secrets) {
         foundSecrets.addAll(secrets.getSecrets());
     }
