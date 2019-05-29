@@ -55,6 +55,11 @@
             <artifactId>bitbucket-page-objects</artifactId>
             <scope>provided</scope>
         </dependency>
+       <dependency>
+            <groupId>com.atlassian.plugins</groupId>
+            <artifactId>atlassian-plugins-webresource</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>

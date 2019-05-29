@@ -24,7 +24,7 @@
 IMPROVE_ME:
 
  // IMPROVE_ME: With current logic, The secret will be "somewhere in file /src/foo.java between lines 12 to 35". It would be better if this can be an exact line number.
-                and EVEN better if this could somehow use Code Insights Annotations - to mark on the actual diff page.
+                and EVEN better if this could somehow use Code Insights Annotations - to mark on the actual diff page. - counter logic.
 
  // IMPROVE_ME:  Cluster Locking
 

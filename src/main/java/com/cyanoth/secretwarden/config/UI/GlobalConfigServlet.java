@@ -16,6 +16,7 @@ import com.atlassian.sal.api.user.UserKey;
 import com.atlassian.sal.api.user.UserManager;
 import com.atlassian.soy.renderer.SoyTemplateRenderer;
 import com.atlassian.soy.renderer.SoyException;
+import com.atlassian.webresource.api.assembler.PageBuilderService;
 
 // [1] https://developer.atlassian.com/server/framework/atlassian-sdk/creating-an-admin-configuration-form/
 
@@ -25,15 +26,20 @@ public class GlobalConfigServlet extends HttpServlet
   private final UserManager userManager;
   private final LoginUriProvider loginUriProvider;
   private SoyTemplateRenderer soyTemplateRenderer;
+  private final PageBuilderService pageBuilderService;
+
 
   @Inject
   public GlobalConfigServlet(@ComponentImport UserManager userManager,
                              @ComponentImport LoginUriProvider loginUriProvider,
-                             @ComponentImport SoyTemplateRenderer soyTemplateRenderer)
+                             @ComponentImport SoyTemplateRenderer soyTemplateRenderer,
+                             @ComponentImport PageBuilderService pageBuilderService)
   {
     this.userManager = userManager;
     this.loginUriProvider = loginUriProvider;
     this.soyTemplateRenderer = soyTemplateRenderer;
+    this.pageBuilderService = pageBuilderService;
+
   }
 
   @Override
@@ -47,8 +53,9 @@ public class GlobalConfigServlet extends HttpServlet
     }
 
     response.setContentType("text/html;charset=UTF-8");
-		soyTemplateRenderer.render(response.getWriter(), "com.cyanoth.secretwarden:secretwarden-globalconfig-ui-res",
-				"com.cyanoth.secretwarden.configPage", null);
+    this.pageBuilderService.assembler().resources().requireContext("com.cyanoth.secretwarden.globaladmin");
+	soyTemplateRenderer.render(response.getWriter(), "com.cyanoth.secretwarden:secretwarden-globalconfig-ui-res",
+	    "com.cyanoth.secretwarden.configPage", null);
   }
 
   private void redirectToLogin(HttpServletRequest request, HttpServletResponse response) throws IOException

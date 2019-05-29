@@ -8,8 +8,8 @@ import java.util.Collection;
 import java.util.HashSet;
 
 /**
- * Collection of FoundSecret - that is, where in the source code a match was found & what was matched.
- * Must implement Serializable to be cluster-safe & ability to replicate within scan results cache across the cluster
+ * Collection of FoundSecret objects - that is, where & what secrets have been found in the source code.
+ * Must implement Serializable to be cluster-safe & have the ability to replicate the scan results cache across the cluster
  */
 public class FoundSecretCollection implements Serializable {
 
@@ -33,7 +33,7 @@ public class FoundSecretCollection implements Serializable {
 
     /**
      * Can be used to merge a smaller set of found secrets to a larger set
-     * @param secrets Another collection of secrets to merge to THIS object
+     * @param secrets Another collection of secrets to merge into THIS object
      */
     public void merge(@NotNull FoundSecretCollection secrets) {
         foundSecrets.addAll(secrets.getSecrets());

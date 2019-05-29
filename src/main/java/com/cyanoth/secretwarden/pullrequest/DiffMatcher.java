@@ -68,8 +68,10 @@ class DiffMatcher extends AbstractDiffContentCallback {
         if (!flagScanSegment || conflictMarker != null) // Don't scan this code segment if preconditions for a scan is false or in conflict.
             return;
 
+
+
         for (MatchRule rule : matchRuleSet.getAllRules()) {
-            if (rule.getRegexPattern().matcher(s).matches()) {
+            if (rule.getCompiledRegexPattern().matcher(s).matches()) {
                 foundSecrets.add(new FoundSecret(rule.getFriendlyName(), destinationFilePath,
                         sourceContext, startSourceLine, endSourceLine));
             }

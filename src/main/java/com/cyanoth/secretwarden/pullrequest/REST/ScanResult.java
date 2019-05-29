@@ -48,8 +48,7 @@ public class ScanResult{
             return Response.status(Response.Status.NOT_FOUND).build();
         }
         else {
-            String resultAsJson = new Gson().toJson(result);
-            return Response.ok(resultAsJson).build();
+            return Response.ok(new Gson().toJson(result)).build();
         }
     }
 }

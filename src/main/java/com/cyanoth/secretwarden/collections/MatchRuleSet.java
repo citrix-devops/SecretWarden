@@ -9,16 +9,16 @@ import java.util.Collection;
 import java.util.HashMap;
 
 /**
- * A collection of MatchRules (subsequently contains regex expression & identifier). These rules find matches in the source code.
+ * A collection of Object.
  * Must implement Serializable to be cluster-safe & ensuring that upon reload (config change) - every node will have the same ruleset.
  */
 public class MatchRuleSet implements Serializable {
     private static final Logger log = LoggerFactory.getLogger(MatchRuleSet.class);
 
-    private HashMap<String, MatchRule> matchRules = new HashMap<>();
+    private HashMap<Integer, MatchRule> matchRules = new HashMap<>();
 
     public void putRule(MatchRule rule) {
-        matchRules.put(rule.getIdentifier(), rule);
+        matchRules.put(rule.getRuleNumber(), rule);
     }
 
     public void putAllRules(Collection<MatchRule> rules) {
@@ -27,8 +27,8 @@ public class MatchRuleSet implements Serializable {
         }
     }
 
-    public MatchRule getRule(String identifier) {
-        return matchRules.get(identifier);
+    public MatchRule getRule(int ruleNumber) {
+        return matchRules.get(ruleNumber);
     }
 
     public Collection<MatchRule> getAllRules() {

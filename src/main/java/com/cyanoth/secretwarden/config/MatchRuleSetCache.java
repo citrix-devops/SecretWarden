@@ -5,8 +5,8 @@ import com.atlassian.cache.CacheFactory;
 import com.atlassian.cache.CacheSettings;
 import com.atlassian.cache.CacheSettingsBuilder;
 import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
-import com.cyanoth.secretwarden.collections.MatchRuleSet;
 import com.cyanoth.secretwarden.RuleSetLoadException;
+import com.cyanoth.secretwarden.collections.MatchRuleSet;
 import com.cyanoth.secretwarden.structures.MatchRule;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -32,15 +32,18 @@ public class MatchRuleSetCache {
     private static final Logger log = LoggerFactory.getLogger(MatchRuleSetCache.class);
     private final String RULESET_KEY = "MatchSecretRuleSet";
     private final String CACHE_NAME = "com.cyanoth.secretwarden:MatchRuleSetCache";
+    private final MatchRuleSettings matchRuleSettings;
     private final CacheFactory cacheFactory;
     private final CacheSettings cacheSettings;
-    private Cache<String, MatchRuleSet> _matchRuleSet = null; // Use cache() for access, even inner class
+
+    private Cache<String, MatchRuleSet> _matchRuleSet = null; // Always Use cache() for access, even inner class
 
     @Autowired
-    public MatchRuleSetCache(@ComponentImport CacheFactory cacheFactory) {
+    public MatchRuleSetCache(@ComponentImport CacheFactory cacheFactory,
+                             MatchRuleSettings matchRuleSettings) {
         this.cacheFactory = cacheFactory;
-        this.cacheSettings = new CacheSettingsBuilder().remote().
-                replicateViaCopy().build();
+        this.cacheSettings = new CacheSettingsBuilder().remote().replicateViaCopy().build();
+        this.matchRuleSettings = matchRuleSettings;
     }
 
     private Cache<String, MatchRuleSet> cache() {
@@ -102,13 +105,12 @@ public class MatchRuleSetCache {
 
             for (JsonElement rule : rules ) {
                 final JsonObject ruleObj = rule.getAsJsonObject();
-
                 try {
-                    ruleCollector.add(new MatchRule(
-                            ruleObj.get("rule_identifier").getAsString(),
-                            ruleObj.get("friendly_name").getAsString(),
-                            ruleObj.get("regex_pattern").getAsString(),
-                             ruleObj.get("enabled").getAsBoolean())); //TODO: Check if this disabled in the config
+                    int ruleNumber = ruleObj.get("rule_number").getAsInt();
+                    ruleCollector.add(new MatchRule(ruleNumber,
+                            matchRuleSettings.getRuleNameOrDefault(ruleNumber, ruleObj.get("friendly_name").getAsString()),
+                            matchRuleSettings.getRulePatternOrDefault(ruleNumber, ruleObj.get("regex_pattern").getAsString()),
+                            matchRuleSettings.getRuleEnabledOrDefault(ruleNumber, true)));
                 }
                 catch (Exception e) {
                     log.warn("An exception occurred trying to load a default rule: Exception", e);
@@ -121,6 +123,9 @@ public class MatchRuleSetCache {
             throw new RuleSetLoadException("DefaultRuleSet", e);
         }
     }
+
+
+
 
     private Set<MatchRule> getCustomRuleSet() throws RuleSetLoadException {
         // Not Yet Implemented

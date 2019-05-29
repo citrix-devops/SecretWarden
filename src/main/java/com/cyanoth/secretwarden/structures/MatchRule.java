@@ -8,22 +8,20 @@ import java.util.regex.Pattern;
  * A match rule is metadata onto of a regular expression, such as a friendly name that would appear to a user.
  */
 public class MatchRule implements Serializable {
-    private final String identifier;
+    private final int ruleNumber;
     private final String friendlyName;
-    private final Pattern regexPattern;
+    private final String regexPattern;
+    private final Pattern compiledRegexPattern;
     private final Boolean enabled;
 
-    public MatchRule(String identifier, String friendlyName, String regexPattern, Boolean enabled) {
-        this.identifier = identifier;
+    public MatchRule(int ruleNumber, String friendlyName, String regexPattern, Boolean enabled) {
+        this.ruleNumber = ruleNumber;
         this.friendlyName = friendlyName;
-        this.regexPattern = Pattern.compile(regexPattern);
+        this.regexPattern = regexPattern;
+        this.compiledRegexPattern = Pattern.compile(regexPattern);
         this.enabled = true;
     }
 
-    @NotNull
-    public String getIdentifier() {
-        return identifier;
-    }
 
     @NotNull
     public String getFriendlyName() {
@@ -31,7 +29,12 @@ public class MatchRule implements Serializable {
     }
 
     @NotNull
-    public Pattern getRegexPattern() {
-        return regexPattern;
+    public Pattern getCompiledRegexPattern() {
+        return compiledRegexPattern;
+    }
+
+    @NotNull
+    public int getRuleNumber() {
+        return ruleNumber;
     }
 }
