@@ -1,5 +1,6 @@
 // Global Configuration Page Javascript Functions
 // [1] https://docs.atlassian.com/aui/8.0.2/docs/restful-table.html
+// [2] https://bitbucket.org/jwalton/aui-archive/src/master/auiplugin-tests/src/main/resources/restfultable/restfultable-example.js
 
 define('SecretWarden/GlobalConfig', [
         'jquery',
@@ -56,6 +57,49 @@ define('SecretWarden/GlobalConfig', [
 
     }
 
+    var CheckboxCreateView = AJS.RestfulTable.CustomCreateView.extend({
+        render: function (self) {
+            var $select = $("<input type='checkbox' checked class='ajs-restfultable-input-"  + self.name + "' />" +
+                "<input type='hidden' name='" + self.name + "'/>");
+            return $select;
+        }
+    });
+
+    var CheckboxEditView = AJS.RestfulTable.CustomEditView.extend({
+        render: function (self) {
+            var attrChecked = "";
+            if (self.value === true)
+                attrChecked = "checked";
+
+            var $select = $("<input type='checkbox' " + attrChecked + " class='ajs-restfultable-input-" + self.name + "' />" +
+                "<input type='hidden' name='" + self.name + "'/>");
+
+            $select.change(function() {
+                if ($select.is(":checked")) {
+                    self.value = true;
+                    $select.val(true);
+                } else {
+                    self.value = false;
+                    $select.val(false);
+                }
+            });
+
+            return $select;
+        }
+    });
+    var CheckboxReadView = AJS.RestfulTable.CustomReadView.extend({
+        render: function (self) {
+
+            var attrChecked = "";
+            if (self.value === true)
+                attrChecked = "checked";
+
+            var $select = $("<input type='checkbox' disabled='disabled' " + attrChecked + " class='ajs-restfultable-input-" + self.name + "' />" +
+                "<input type='hidden' name='" + self.name + "'/>");
+            return $select;
+        }
+    });
+
     function buildMatchRulesetTable() {
         console.log("Building the MatchSecretRule RESTful table...");
 
@@ -64,13 +108,13 @@ define('SecretWarden/GlobalConfig', [
             autoFocus: true,
             allowDelete: false, // DELETE Not yet implemented
             resources: {
-                all: AJS.contextPath() + "/rest/secretwarden/1.0/globalconfig/match-secret-rules",
-                self: AJS.contextPath() + "/rest/secretwarden/1.0/globalconfig/match-secret-rule/{ruleNumber}"
+                all: AJS.contextPath() + "/rest/secretwarden/1.0/globalconfig/match-secret-rule",
+                self: AJS.contextPath() + "/rest/secretwarden/1.0/globalconfig/match-secret-rule"
             },
             columns: [
                 {
                     id: "ruleNumber",
-                    header: "Rule Identifier",
+                    header: "Rule Number",
                     allowEdit: false
                 },
                 {
@@ -83,7 +127,10 @@ define('SecretWarden/GlobalConfig', [
                 },
                 {
                     id: "enabled",
-                    header: "Enabled"
+                    header: "Enabled",
+                    readView: CheckboxReadView,
+                    editView: CheckboxEditView,
+                    createView: CheckboxCreateView
                 }
             ]
         });

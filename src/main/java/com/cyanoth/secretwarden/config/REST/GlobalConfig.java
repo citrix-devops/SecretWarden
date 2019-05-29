@@ -47,6 +47,7 @@ public class GlobalConfig  {
 
     @GET
     @Path("/match-secret-rule/{rule_number}")
+    @Produces({ MediaType.APPLICATION_JSON })
     public Response getMatchSecretRule(@PathParam("rule_number") int ruleNumber) {
         MatchRule rule = matchRuleSetCache.getRuleSet().getRule(ruleNumber);
 
@@ -58,8 +59,8 @@ public class GlobalConfig  {
     }
 
     @GET
-    @Path("/match-secret-rules")
-    @Produces({MediaType.APPLICATION_JSON})
+    @Path("/match-secret-rule")
+    @Produces({ MediaType.APPLICATION_JSON })
     public Response getMatchSecretRules() {
         Collection<MatchRule> rules = matchRuleSetCache.getRuleSet().getAllRules();
 
@@ -71,29 +72,56 @@ public class GlobalConfig  {
     }
 
     @PUT
-    @Path("/match-secret-rule/{rule_number}")
-    @Consumes({MediaType.APPLICATION_JSON})
-    public Response updateMatchSecretRule(@PathParam("rule_number") int ruleNumber) {
+    @Path("/match-secret-rule")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.TEXT_PLAIN })
+    public Response updateMatchSecretRule(MatchRule incomingRule) {
 
-        // TODO: updateMatchSecretRule
+        // TODO: Create a rule
 
-        log.debug("Updating rule");
-
+        log.debug("I'm here");
 
         return Response.ok("Updated ").build();
     }
 
     @POST
-    @Path("/match-secret-rule/{rule_number}")
-    public Response createMatchSecretRule(@PathParam("rule_number") int ruleNumber) {
+    @Path("/match-secret-rule")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    public Response updateMatchRule(MatchRule incomingRule) {
+        try {
+            this.permissionValidationService.validateForGlobal(Permission.ADMIN);
 
-        // TODO: createMatchSecretRule
+            try {
+                int ruleNumber = incomingRule.getRuleNumber();
+                String newFriendlyName = incomingRule.getFriendlyName();
+                String newRegexPattern = incomingRule.getCompiledRegexPattern().toString();
+                Boolean newIsEnabled = incomingRule.getIsEnabled();
 
-        return Response.ok("Created").build();
+                log.info(String.format("Updating a MatchSecret Rule: Number: %d Name: %s Pattern: %s Enabled: %s",
+                        ruleNumber, newFriendlyName, newRegexPattern, newIsEnabled.toString()));
+
+                matchRuleSettings.setRuleEnabled(ruleNumber, newIsEnabled);
+                matchRuleSettings.setRuleName(ruleNumber, newFriendlyName);
+                matchRuleSettings.setRulePattern(ruleNumber, newRegexPattern);
+
+                reloadRuleSet();
+
+                return Response.ok("{}").build(); //AJS Restful Table response requires JSON response as OK
+            }
+            catch (Exception e) {
+                log.error("Failed to update a MatchRule. An error occurred.", e);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new RestErrorMessage("Failed to update MatchSecret Rule." +
+                        "An error occurred, see server-logs for more information")).build();
+            }
+
+        } catch (AuthorisationException e) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
     }
 
     @PUT
     @Path("/clear-result-cache")
+    @Produces({ MediaType.TEXT_PLAIN })
     public Response clearResultCache() {
         try {
             this.permissionValidationService.validateForGlobal(Permission.ADMIN);
@@ -114,9 +142,11 @@ public class GlobalConfig  {
 
     @PUT
     @Path("/reload-ruleset")
+    @Produces({ MediaType.TEXT_PLAIN })
     public Response reloadRuleSet() {
         try {
             this.permissionValidationService.validateForGlobal(Permission.ADMIN);
+
             try {
                 log.debug("Reloading MatchSecretRuleSet...");
                 matchRuleSetCache.reloadRuleSet();
@@ -127,6 +157,7 @@ public class GlobalConfig  {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new RestErrorMessage("The SecretWarden MatchRuleSet has NOT been reloaded." +
                         "An error occurred, see server-logs for more information")).build();
             }
+
         } catch (AuthorisationException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }

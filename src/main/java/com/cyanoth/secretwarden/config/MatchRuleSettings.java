@@ -93,7 +93,7 @@ public class MatchRuleSettings {
 
     public boolean setRuleEnabled(@NotNull int ruleNumber, @NotNull Boolean ruleEnabled) {
         String key = getRuleKeyName(ruleNumber, KEY_APPENDIX_ENABLED);
-        pluginSettings.put(key, ruleEnabled);
+        pluginSettings.put(key, ruleEnabled.toString());
         log.debug(String.format("Set rule pattern for Rule #: %d Key: %s Value: %s", ruleNumber, key, ruleEnabled.toString()));
         return true;
     }
@@ -102,9 +102,6 @@ public class MatchRuleSettings {
         if (ruleName.length() <= MIN_STRING_CHARACTERS || ruleName.length() > MAX_RULENAME_CHARACTERS)
             throw new IllegalArgumentException(String.format("Rule name length must be greater than %d characters & smaller than %d characters.",
                     MIN_STRING_CHARACTERS, MAX_RULENAME_CHARACTERS));
-
-        if (!ruleName.matches("^[a-zA-Z0-9_-]*$"))
-            throw new IllegalArgumentException("Rulename must only contain alphanumeric characters & underscores");
     }
 
     private void validateRulePattern(String rulePattern) throws IllegalArgumentException {
@@ -126,8 +123,8 @@ public class MatchRuleSettings {
     }
 
     public Boolean getRuleEnabledOrDefault(@NotNull int ruleNumber, @Nullable Boolean defaultValue) {
-        Boolean ruleEnabled = (Boolean) pluginSettings.get(getRuleKeyName(ruleNumber, KEY_APPENDIX_ENABLED));
-        return (ruleEnabled == null) ? defaultValue : ruleEnabled;
+        String ruleEnabled = (String) pluginSettings.get(getRuleKeyName(ruleNumber, KEY_APPENDIX_ENABLED));
+        return (ruleEnabled == null) ? defaultValue : Boolean.valueOf(ruleEnabled);
     }
 
 

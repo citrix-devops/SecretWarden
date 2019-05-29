@@ -67,6 +67,9 @@ class DiffMatcher extends AbstractDiffContentCallback {
             return;
 
         for (MatchRule rule : matchRuleSet.getAllRules()) {
+            if (!rule.getIsEnabled())
+                continue;
+
             if (rule.getCompiledRegexPattern().matcher(s).matches()) {
                 foundSecrets.add(new FoundSecret(rule.getFriendlyName(), destinationFilePath,
                         sourceContext, lineCounter));

@@ -1,5 +1,7 @@
 package com.cyanoth.secretwarden.structures;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.regex.Pattern;
@@ -11,15 +13,17 @@ public class MatchRule implements Serializable {
     private final int ruleNumber;
     private final String friendlyName;
     private final String regexPattern; // Used on configuration page. Use the pre-compiled compiledRegexPattern elsewhere
-    private final Pattern compiledRegexPattern;
+    private transient Pattern compiledRegexPattern = null;
     private final Boolean enabled;
 
-    public MatchRule(int ruleNumber, String friendlyName, String regexPattern, Boolean enabled) {
+    public MatchRule(@JsonProperty("ruleNumber") int ruleNumber,
+                     @JsonProperty("friendlyName") String friendlyName,
+                     @JsonProperty("regexPattern") String regexPattern,
+                     @JsonProperty("enabled") Boolean enabled) {
         this.ruleNumber = ruleNumber;
         this.friendlyName = friendlyName;
         this.regexPattern = regexPattern;
-        this.compiledRegexPattern = Pattern.compile(regexPattern);
-        this.enabled = true;
+        this.enabled = enabled;
     }
 
     @NotNull
@@ -29,11 +33,19 @@ public class MatchRule implements Serializable {
 
     @NotNull
     public Pattern getCompiledRegexPattern() {
+        if (compiledRegexPattern == null) {
+            compiledRegexPattern = Pattern.compile(regexPattern);
+        }
+
         return compiledRegexPattern;
     }
 
     @NotNull
     public int getRuleNumber() {
         return ruleNumber;
+    }
+
+    public Boolean getIsEnabled() {
+        return enabled;
     }
 }
