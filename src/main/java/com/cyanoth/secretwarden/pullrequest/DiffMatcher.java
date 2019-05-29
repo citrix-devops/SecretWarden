@@ -12,7 +12,6 @@ import com.cyanoth.secretwarden.structures.MatchRule;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-
 /**
  * INTERNAL: Finds & collect secrets that match rules in the ruleset in a given hunk of changes.
  *
@@ -37,9 +36,7 @@ class DiffMatcher extends AbstractDiffContentCallback {
     // We must keep this information incase of a matched secret at the end of the callback flow.
     private String destinationFilePath = null;
     private String sourceContext = null;
-    private int startSourceLine = -1;
-    private int endSourceLine = -1;
-
+    private int lineCounter = 0;
 
     /**
      * INTERNAL: Finds & collect secrets that match rules in the ruleset in a given hunk of changes.
@@ -58,22 +55,21 @@ class DiffMatcher extends AbstractDiffContentCallback {
 
     @Override
     public void onHunkStart(int srcLine, int srcSpan, int dstLine, int dstSpan, @Nullable String context) {
-        startSourceLine = dstLine;
-        endSourceLine  = dstLine + dstSpan; // Example: This hunk ranges from line 32 - 64
+        lineCounter = dstLine;
         sourceContext = context;
     }
 
     @Override
     public void onSegmentLine(@Nonnull String s, @Nullable ConflictMarker conflictMarker, boolean b) {
+        lineCounter++;
+
         if (!flagScanSegment || conflictMarker != null) // Don't scan this code segment if preconditions for a scan is false or in conflict.
             return;
-
-
 
         for (MatchRule rule : matchRuleSet.getAllRules()) {
             if (rule.getCompiledRegexPattern().matcher(s).matches()) {
                 foundSecrets.add(new FoundSecret(rule.getFriendlyName(), destinationFilePath,
-                        sourceContext, startSourceLine, endSourceLine));
+                        sourceContext, lineCounter));
             }
         }
     }

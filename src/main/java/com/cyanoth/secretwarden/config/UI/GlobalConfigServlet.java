@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URI;
 
 import javax.inject.Inject;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -15,11 +14,13 @@ import com.atlassian.sal.api.auth.LoginUriProvider;
 import com.atlassian.sal.api.user.UserKey;
 import com.atlassian.sal.api.user.UserManager;
 import com.atlassian.soy.renderer.SoyTemplateRenderer;
-import com.atlassian.soy.renderer.SoyException;
 import com.atlassian.webresource.api.assembler.PageBuilderService;
 
-// [1] https://developer.atlassian.com/server/framework/atlassian-sdk/creating-an-admin-configuration-form/
-
+/**
+ * Servlet for the global configuration (administrator) page.
+ * Validate permission & server-side render a soy template upon an API request
+ * [1] https://developer.atlassian.com/server/framework/atlassian-sdk/creating-an-admin-configuration-form/
+ */
 @Scanned
 public class GlobalConfigServlet extends HttpServlet
 {
@@ -39,28 +40,22 @@ public class GlobalConfigServlet extends HttpServlet
     this.loginUriProvider = loginUriProvider;
     this.soyTemplateRenderer = soyTemplateRenderer;
     this.pageBuilderService = pageBuilderService;
-
   }
 
   @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException
   {
     UserKey userKey = userManager.getRemoteUserKey(request);
     if (userKey == null || !userManager.isAdmin(userKey))
     {
-      redirectToLogin(request, response);
-      return;
+      response.sendRedirect(this.loginUriProvider.getLoginUri(this.getUri(request)).toASCIIString());
     }
 
     response.setContentType("text/html;charset=UTF-8");
     this.pageBuilderService.assembler().resources().requireContext("com.cyanoth.secretwarden.globaladmin");
+
 	soyTemplateRenderer.render(response.getWriter(), "com.cyanoth.secretwarden:secretwarden-globalconfig-ui-res",
 	    "com.cyanoth.secretwarden.configPage", null);
-  }
-
-  private void redirectToLogin(HttpServletRequest request, HttpServletResponse response) throws IOException
-  {
-    response.sendRedirect(loginUriProvider.getLoginUri(getUri(request)).toASCIIString());
   }
 
   private URI getUri(HttpServletRequest request)

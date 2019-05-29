@@ -10,13 +10,16 @@ import com.cyanoth.secretwarden.collections.MatchRuleSet;
 import javax.annotation.Nonnull;
 import javax.validation.constraints.NotNull;
 
+/**
+ * INTERNAL! Class which streams differences (think different files) of a pull request before passing that information onto DiffMatcher
+ */
 class ChangeStreamer {
     private final PullRequestService pullRequestService;
     private final FoundSecretCollection totalFoundSecrets;
     private final MatchRuleSet matchRuleSet;
 
     /**
-     * INTERNAL! Stream differences (think different files here) of a pull-requests before passing onto DiffMatcher.
+     * INTERNAL! Class which streams differences (think different files) of a pull request before passing that information onto DiffMatcher
      * @param pullRequestService Initialised Bitbucket PullRequestService for PR operations (stream)
      * @param matchRuleSet Collection of rules to find secrets in text.
      */

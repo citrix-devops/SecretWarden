@@ -7,17 +7,15 @@
         <param name="plugin-logo">images/pluginLogo.png</param>
     </plugin-info>
 
-
     <!-- Merge Check Resources -->
     <repository-merge-check key="has-secret-pr-merge-check" name="Prevent Merging Secrets" class="bean:HasSecretMergeCheck" configurable="true">
-        <icon>images/secretwarden_hook_alticon.png</icon>
+        <icon>images/secretwarden_hook_icon.png</icon>
         <description>Require a repository administrator to merge pull-request if the pull request contains secrets</description>
         <scopes>
-            <!-- <scope>project</scope> -->
+            <scope>project</scope>
             <scope>repository</scope>
         </scopes>
     </repository-merge-check>
-
 
     <!-- Pull-request user interface for SecretWarden Overview Resources -->
     <client-resource key="secretwarden-pullrequest-ui-res" name="Resources: Pull Request Overview Panel Dependencies">
@@ -28,52 +26,54 @@
         <dependency>com.atlassian.auiplugin:ajs</dependency>
         <dependency>com.atlassian.bitbucket.server.bitbucket-web:global</dependency>
         <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:pull-request-web-panels</dependency>
-        <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:amd</dependency>
         <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:aui</dependency>
         <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:state</dependency>
         <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:jquery</dependency>
         <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:navbuilder</dependency>
     </client-resource>
 
+    <!-- Pull-request user interface panel configuration -->
     <client-web-panel name="Interface: Pull Request Overview Panel" key="secretwarden-pullrequest-ui" location="bitbucket.pull-request.related-entities" weight="2050">
         <description>Summary of the found secret scan results on the overview page of a pull request.</description>
 
         <resource name="view" type="soy" location="com.cyanoth.secretwarden:secretwarden-pullrequest-ui-res/com.cyanoth.secretwarden.panel" />
         <client-context-provider>require('SecretWarden/PullRequestUIOverview').showSecretScanPROverview</client-context-provider>
-        <!--<client-condition></client-condition>-->
+        <!--<client-condition>TODO</client-condition>-->
 
         <dependency>com.cyanoth.secretwarden:secretwarden-pullrequest-ui-res</dependency>
     </client-web-panel>
 
-
-
-
-    <client-resource key="secretwarden-globalconfig-ui-res" name="REPLACE ME">
-
+    <!-- Resources for the global configuration ui page -->
+    <client-resource key="secretwarden-globalconfig-ui-res" name="secretwarden-globalconfig-ui-res">
         <resource type="download" name="secretwarden-global-config.js" location="/js/secretwarden-global-config.js"/>
         <resource type="download" name="secretwarden-global-config.soy.js" location="/soy/secretwarden-global-config.soy"/>
         <context>com.cyanoth.secretwarden.globaladmin</context>
 
         <dependency>com.atlassian.auiplugin:ajs</dependency>
-        <dependency>com.atlassian.auiplugin:aui-experimental-expander</dependency>
         <dependency>com.atlassian.bitbucket.server.bitbucket-web:global</dependency>
-        <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:amd</dependency>
         <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:aui</dependency>
-        <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:state</dependency>
         <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:jquery</dependency>
         <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:navbuilder</dependency>
         <dependency>com.atlassian.auiplugin:aui-experimental-restfultable</dependency>
     </client-resource>
 
-
+    <!-- Servlet for the global configuration page -->
     <servlet key="secretwarden-globalconfig-servlet" class="com.cyanoth.secretwarden.config.UI.GlobalConfigServlet">
         <url-pattern>/secretwarden/globalconfig</url-pattern>
         <dependency>com.cyanoth.secretwarden:secretwarden-globalconfig-ui-res-</dependency>
-
     </servlet>
 
+    <web-item key="secretwarden-admin-configuration-panel" name="Secret Warden Administration Link" weight="20" section="atl.admin/admin-plugins-section" application="bitbucket">
+        <condition class="com.atlassian.bitbucket.web.conditions.HasGlobalPermissionCondition">
+            <param name="permission">ADMIN</param>
+        </condition>
+        <label key="plugin.page.repo.ci.info.tab.label">Secret Warden</label>
+        <tooltip key="plugin.page.repo.ci.sys.info.tab.tooltip">Configure SecretWarden settings.</tooltip>
+        <link>/plugins/servlet/secretwarden/globalconfig</link>
+    </web-item>
+
     <rest name="SecretWarden REST API" key="secretwarden-rest-resources" path="/secretwarden" version="1.0">
-        <description>Description goes here</description>
+        <description>Secret Warden REST Resources</description>
     </rest>
 
 </atlassian-plugin>

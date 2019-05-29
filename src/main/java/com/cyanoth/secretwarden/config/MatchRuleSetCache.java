@@ -24,18 +24,20 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Exposed OSGi Service which uses the Atlassian Cache API to cache a single instance of MatchRuleSet (identified by the key: RULESET_KEY)
- * With this, we can ensure that the loaded ruleset is replicated across all nodes in the cluster even after it has been updated by configuration changes.
+ * An exposed component uses the Atlassian Cache API to cache in memory a single instance of MatchRuleSet (identified by the key: RULESET_KEY)
+ * With this, we can ensure that the loaded ruleset is replicated across all nodes in the cluster even after it has been updated by configuration changes
+ * and remains in memory, so we don't have to fetch the rule every time from settings.
+ *
+ * [1] https://docs.atlassian.com/atlassian-cache-api/2.2.0/atlassian-cache-api/apidocs/com/atlassian/cache/CacheFactory.html
  */
 @Component
 public class MatchRuleSetCache {
     private static final Logger log = LoggerFactory.getLogger(MatchRuleSetCache.class);
-    private final String RULESET_KEY = "MatchSecretRuleSet";
     private final String CACHE_NAME = "com.cyanoth.secretwarden:MatchRuleSetCache";
+    private final String RULESET_KEY = "MatchSecretRuleSet";
     private final MatchRuleSettings matchRuleSettings;
     private final CacheFactory cacheFactory;
     private final CacheSettings cacheSettings;
-
     private Cache<String, MatchRuleSet> _matchRuleSet = null; // Always Use cache() for access, even inner class
 
     @Autowired
@@ -50,8 +52,14 @@ public class MatchRuleSetCache {
         synchronized (this) {
             if (this._matchRuleSet == null) {
                 this._matchRuleSet = this.cacheFactory.getCache(CACHE_NAME, null, cacheSettings);
-                reloadRuleSet();
-                log.debug("SecretWarden: A new cache object has been initialised for MatchRuleSet!");
+                try {
+                    reloadRuleSet();
+                    log.debug("SecretWarden: A new cache object has been initialised for MatchRuleSet!");
+                }
+                catch (RuleSetLoadException e) {
+                    log.error("Failed to load SecretWarden RuleSet! RuleSet may be empty...");
+
+                }
             }
             return this._matchRuleSet;
         }
@@ -66,30 +74,29 @@ public class MatchRuleSetCache {
 
     /**
      * Reloads the ruleset from default plugin & user configuration rules. Incase of failure, the old ruleset is kept.
-     * @return True - Rule set reload. False on error, the ruleset wasn't reloaded.
      */
-    public boolean reloadRuleSet() {
-        log.info("Reloading SecretWarden Ruleset");
+    public void reloadRuleSet() throws RuleSetLoadException {
+        log.info("Reloading SecretWarden MatchRuleset");
         try {
 
-            // Intentionally do it like this, incase an error occurs the cache isn't replaced
+            // Intentionally load into a temporary local variable, incase an error occurs, the cache doesn't get replaced
             MatchRuleSet ruleSet = new MatchRuleSet();
             ruleSet.putAllRules(getDefaultRuleSet());
             ruleSet.putAllRules(getCustomRuleSet());
 
+            cache().removeAll();
             cache().put(RULESET_KEY, ruleSet);
 
             log.info(String.format("SecretWarden ruleset reloaded successfully and contains: %d rules", cache().get(RULESET_KEY).count()));
-            return true;
         }
         catch (RuleSetLoadException e) {
             log.error(String.format("Failed to reload SecretWarden ruleset.\nAn exception has occurred: %s", e.getMessage()));
-            return false;
+            throw e;
         }
     }
 
     /**
-     * Load the built-in ruleset
+     * Load the built-in ruleset. Any changes the user has made (in settings) will override the values in the file
      * @return Set of secret rules from the plugin resources folder.
      * @throws RuleSetLoadException Exception which meant the default ruleset could not be loaded.
      */
@@ -124,13 +131,8 @@ public class MatchRuleSetCache {
         }
     }
 
-
-
-
     private Set<MatchRule> getCustomRuleSet() throws RuleSetLoadException {
         // Not Yet Implemented
         return new HashSet<>();
     }
-
-
 }

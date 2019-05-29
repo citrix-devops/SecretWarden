@@ -10,6 +10,9 @@ import com.cyanoth.secretwarden.config.MatchRuleSetCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Take a pull request from Bitbucket and handle the flow of a secret scan, including returning results.
+ */
 public class PullRequestSecretScanner implements SecretScanner {
     private static final Logger log = LoggerFactory.getLogger(PullRequestSecretScanner.class);
     private final PullRequestSecretScanResultCache pullRequestSecretScanCache;
@@ -27,7 +30,12 @@ public class PullRequestSecretScanner implements SecretScanner {
         this.matchRuleSetCache = matchRuleSetCache;
     }
 
-
+    /**
+     *
+     * @param force Do not check cache. Scan even if the result is in the cache
+     * @return Results of the secret scan (including but not limited to, found secrets & pull request last updated)
+     * @throws SecretScanException An handled exception occurred during the scan but means results are incomplete
+     */
     @Override
     public PullRequestSecretScanResult scan(Boolean force) throws SecretScanException {
         log.debug(String.format("SecretWarden scanning pull request: %s (PR ID: %d)", pullRequest.getToRef(), pullRequest.getId()));
@@ -50,7 +58,7 @@ public class PullRequestSecretScanner implements SecretScanner {
             }
 
             long scanStartTime = 0;
-            if (log.isDebugEnabled())
+            if (log.isDebugEnabled()) // Debug mode will time how long it takes
                 scanStartTime = System.currentTimeMillis();
 
             // IMPROVE_ME: It may be worth considering putting a cluster lock here so that only one node will run a secret scan at a time.
@@ -71,9 +79,9 @@ public class PullRequestSecretScanner implements SecretScanner {
                                     pullRequest.getToRef(), pullRequest.getId(), scan.countFoundSecrets()));
 
             if (log.isDebugEnabled()) {
-                long elaspedTime = System.currentTimeMillis() - scanStartTime;
+                long elapsedTime = System.currentTimeMillis() - scanStartTime;
                 log.debug(String.format("SecretWarden took %d milliseconds to scan the pull request: %s (ID %d)",
-                        elaspedTime, pullRequest.getToRef(), pullRequest.getId()));
+                        elapsedTime, pullRequest.getToRef(), pullRequest.getId()));
             }
 
             return scan;

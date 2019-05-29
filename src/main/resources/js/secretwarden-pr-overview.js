@@ -1,4 +1,4 @@
-
+// Javascript functions to display the dialog / secret scan results on the pull request user interface
 // [1] https://docs.atlassian.com/bitbucket-server/docs/6.3.0/reference/javascript/
 
 define('SecretWarden/PullRequestUIOverview', [
@@ -6,43 +6,47 @@ define('SecretWarden/PullRequestUIOverview', [
         'bitbucket/util/navbuilder',
         'bitbucket/util/server',
         'bitbucket/util/state',
-        'aui/flag',
         'exports'
     ], function(
         $,
         navbuilder,
         server,
         state,
-        flag,
         exports) {
         'use strict';
 
-        var CHECK_INTERVAL = 500;
 
+        // On an open pull-request, poll the REST Endpoint every 500ms to check the secret scan status.
+        // This can be not found, in progress, failed, completed. Each case should be handled appropriately.
+        var CHECK_INTERVAL = 500;
         var checkScanStatus;
-        function getScanStatusTimer() {
+        function getScanStatusPoller() {
             server.rest({
                 url: navbuilder.rest("secretwarden").addPathComponents("prscan", "result", state.getProject().key,
                      state.getRepository().slug, state.getPullRequest().id).build(),
                 type: 'GET',
                 async: false,
                 success: function (results, textStatus, jqXHR) {
-                    console.log("SecretWarden scan result retrieved successfully.");
+                    console.log("SecretWarden scan result has been retrieved successfully! Updating UI elements");
                     updateOverviewLinkWithResults(results);
 
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     if (jqXHR.status === 404) {
-                        console.log("SecretWarden scan has not yet started. Will retry in " + CHECK_INTERVAL + "ms")
+                        console.log("SecretWarden scan has still not started. Will recheck in " + CHECK_INTERVAL + "ms")
                     } else {
                         console.log("SecretWarden getScanStatus failed! Status: " + jqXHR.status + " Error:" + errorThrown.toString());
                         updateOverviewLinkAsFailed();
                     }
+                },
+                statusCode: {
+                    500: false // Stop bitbucket default error handling
                 }
             });
 
         }
 
+        // The scan results have come through, update UI element with secret count
         function updateOverviewLinkWithResults(scanResult) {
             clearInterval(checkScanStatus);
             var linkEle = $(".secretwarden-overview-link");
@@ -60,15 +64,13 @@ define('SecretWarden/PullRequestUIOverview', [
 
             } else if (secretCount === 0) {
                 linkEle.addClass("nosecrets");
-                removeLinkElement()
                 labEle.text("No secrets were found");
             } else {
                 updateOverviewLinkAsFailed();
             }
         }
 
-
-
+        // The secret scan has been reported as failed.
         function updateOverviewLinkAsFailed() {
             clearInterval(checkScanStatus);
             var linkEle = $(".secretwarden-overview-link");
@@ -76,33 +78,23 @@ define('SecretWarden/PullRequestUIOverview', [
 
             linkEle.addClass("failed");
             labEle.text("SecretWarden secret scan failed");
-            removeLinkElement()
-
         }
 
-        function removeLinkElement() {
-            var linkEle = $(".secretwarden-overview-link");
-            linkEle.$("a").replaceWith(function() {
-                return $('span', this);
-            });
-
-        }
-
+        // When secret have been found, handle on click so that they are displayed in a dialog
         function setOnClickHandler(foundSecrets) {
-            $(document).on('click', '.secretwarden-overview-link', function (e) {
+            $(document).one('click', '.secretwarden-overview-link', function (e) {
                 e.preventDefault();
                 console.log(foundSecrets);
                 var dialog = AJS.dialog2($(com.cyanoth.secretwarden.overviewDialog({foundSecrets: foundSecrets})));
                 dialog.show();
-                console.log("I got clicked...");
             });
         }
 
+        // Start a timer to poll the secret scan result
         function start() {
-            checkScanStatus = setInterval(getScanStatusTimer, 500);
+            getScanStatusPoller();
+            checkScanStatus = setInterval(getScanStatusPoller, 500);
         }
-
-
 
         exports.showSecretScanPROverview = function (context) {
             start();

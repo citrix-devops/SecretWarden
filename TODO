@@ -2,8 +2,6 @@
 1)
 [ ] Global Administrator Configuration Page
 
-    -> Clear Cache Button
-
     -> Rule set (table where administrator can edit)
 
 
@@ -11,9 +9,6 @@
 
 2)
 [ ] Conditions for Showing (only on open pull requests)
-
-
-[ ] Verify Pull Request UI overview logic
 
 ------
 
@@ -23,11 +18,8 @@
 
 IMPROVE_ME:
 
- // IMPROVE_ME: With current logic, The secret will be "somewhere in file /src/foo.java between lines 12 to 35". It would be better if this can be an exact line number.
-                and EVEN better if this could somehow use Code Insights Annotations - to mark on the actual diff page. - counter logic.
-
  // IMPROVE_ME:  Cluster Locking
 
  // IMPROVE_ME:  i18nService
 
- // IMPROVE_ME:  REST Model
+ // IMPROVE_ME:  Data Models

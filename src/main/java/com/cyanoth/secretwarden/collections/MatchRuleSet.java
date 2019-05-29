@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 /**
- * A collection of Object.
+ * A collection of MatchRule objects, that is, the name of a secret rule matching pattern & regular expression.
  * Must implement Serializable to be cluster-safe & ensuring that upon reload (config change) - every node will have the same ruleset.
  */
 public class MatchRuleSet implements Serializable {

@@ -4,45 +4,37 @@ import javax.annotation.Nullable;
 import java.io.Serializable;
 
 /**
- *  Details about a single found secret. Intentionally immutable after initialization.
+ *  Details about a single found secret. Intentionally becomes immutable (no setters) after initialization.
  */
 public class FoundSecret implements Serializable {
     private String matchedRuleName;
     private String destinationFilePath = null;
     private String sourceContext = null;
-    private int startSourceLine = -1;
-    private int endSourceLine = -1;
+    private int occurrenceLine = -1;
 
     FoundSecret(String matchedRuleName) {
         this.matchedRuleName = matchedRuleName;
     }
 
-    FoundSecret(String matchedRuleName, String destinationFilePath, int startSourceLine, int endSourceLine) {
+    FoundSecret(String matchedRuleName, String destinationFilePath, int occurrenceLine) {
         this.matchedRuleName = matchedRuleName;
         this.destinationFilePath = destinationFilePath;
-        this.startSourceLine = startSourceLine;
-        this.endSourceLine = endSourceLine;
+        this.occurrenceLine = occurrenceLine;
     }
 
-    public FoundSecret(String matchedRuleName, String destinationFilePath, String sourceContext, int startSourceLine, int endSourceLine) {
+    public FoundSecret(String matchedRuleName, String destinationFilePath, String sourceContext, int occurrenceLine) {
         this.matchedRuleName = matchedRuleName;
         this.destinationFilePath = destinationFilePath;
         this.sourceContext = sourceContext;
-        this.startSourceLine = startSourceLine;
-        this.endSourceLine = endSourceLine;
+        this.occurrenceLine = occurrenceLine;
     }
-
 
     public String getmatchedRuleName() {
         return matchedRuleName;
     }
 
-    public int getStartSourceLine() {
-        return startSourceLine;
-    }
-
-    public int getEndSourceLine() {
-        return endSourceLine;
+    public int getOccurrenceLine() {
+        return occurrenceLine;
     }
 
     @Nullable
@@ -55,6 +47,9 @@ public class FoundSecret implements Serializable {
         return sourceContext;
     }
 
+    /**
+     * @return Friendly string containing information that exists about this found secret
+     */
     public String toString() {
         String builder = String.format("Matched Rule Name: %s", matchedRuleName);
 
@@ -64,8 +59,9 @@ public class FoundSecret implements Serializable {
         if (sourceContext != null)
             builder += String.format(" Context: %s", sourceContext);
 
-        if (startSourceLine != 1 && endSourceLine != 1)
-            builder += String.format(" Between Lines: %d - %d", startSourceLine, endSourceLine);
+        if (occurrenceLine != -1) {
+            builder += String.format(" Occurred on line: %d", occurrenceLine);
+        }
 
         return builder;
     }

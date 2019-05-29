@@ -16,9 +16,13 @@ import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import java.util.concurrent.TimeUnit;
 
-// [1] https://docs.atlassian.com/atlassian-cache-api/2.2.0/atlassian-cache-api/apidocs/com/atlassian/cache/CacheFactory.html
-// [2] https://bitbucket.org/atlassian/atlassian-spring-scanner/src/1.2.x/
-
+/**
+ * An exposed component uses the Atlassian Cache API to cache in memory a single instance of collection of pull request secret scan results
+ * With this, we can ensure that the scan results are replicated across all nodes in the cluster & remains in memory.
+ *
+ * [1] https://docs.atlassian.com/atlassian-cache-api/2.2.0/atlassian-cache-api/apidocs/com/atlassian/cache/CacheFactory.html
+ * [2] https://bitbucket.org/atlassian/atlassian-spring-scanner/src/1.2.x/
+ */
 @Component
 public class PullRequestSecretScanResultCache {
     private static final Logger log = LoggerFactory.getLogger(PullRequestSecretScanResultCache.class);
@@ -61,6 +65,7 @@ public class PullRequestSecretScanResultCache {
 
     public void clear() {
         cache().removeAll();
+        log.info("SecretWarden PullRequestSecretScan result cache cleared!");
     }
 
     @NotNull

@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 public class MatchRule implements Serializable {
     private final int ruleNumber;
     private final String friendlyName;
-    private final String regexPattern;
+    private final String regexPattern; // Used on configuration page. Use the pre-compiled compiledRegexPattern elsewhere
     private final Pattern compiledRegexPattern;
     private final Boolean enabled;
 
@@ -21,7 +21,6 @@ public class MatchRule implements Serializable {
         this.compiledRegexPattern = Pattern.compile(regexPattern);
         this.enabled = true;
     }
-
 
     @NotNull
     public String getFriendlyName() {

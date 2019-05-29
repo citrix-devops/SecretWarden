@@ -1,7 +1,6 @@
 package com.cyanoth.secretwarden.pullrequest.REST;
 
 import com.atlassian.plugin.spring.scanner.annotation.component.Scanned;
-import com.atlassian.sal.api.user.UserManager;
 import com.cyanoth.secretwarden.pullrequest.PullRequestSecretScanResult;
 import com.cyanoth.secretwarden.pullrequest.PullRequestSecretScanResultCache;
 import com.google.gson.Gson;
@@ -15,16 +14,19 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+/**
+ * Exposed REST endpoints to retrieve pull request secret scan result from cache
+ *
+ * [1] https://developer.atlassian.com/server/framework/atlassian-sdk/rest-plugin-module/
+ */
 @Path("/prscan/result")
 @Scanned
 public class ScanResult{
     private static final Logger log = LoggerFactory.getLogger(ScanResult.class);
     private final PullRequestSecretScanResultCache pullRequestSecretScanResultCache;
-    private final UserManager userManager;
 
-    ScanResult(PullRequestSecretScanResultCache pullRequestSecretScanResultCache, UserManager userManager) {
+    ScanResult(PullRequestSecretScanResultCache pullRequestSecretScanResultCache) {
         this.pullRequestSecretScanResultCache = pullRequestSecretScanResultCache;
-        this.userManager = userManager;
     }
 
     /**

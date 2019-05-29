@@ -16,6 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import javax.annotation.Nonnull;
 
+/**
+ * Bitbucket Merge Check class. If enabled on project/repository, on a new pull request this gets invoked.
+ * The merge check will invoke a secret scan, check how many secrets were found.
+ * If one or more secrets were found, the merge will be blocked unless the user is a project/repository administrator.
+ */
 @Component("HasSecretMergeCheck")
 @Scanned
 public class HasSecretMergeCheck implements RepositoryMergeCheck {
@@ -59,11 +64,11 @@ public class HasSecretMergeCheck implements RepositoryMergeCheck {
         }
         // If an exception occurs performing this merge check, don't block the pull request from being merged - just log the exception that occurred.
         catch (SecretScanException e) {
-           log.error("ERROR: HasSecretMergeCheck failed whilst performing a secret scan. Exception: ", e);
+           log.error("ERROR: HasSecretMergeCheck has failed whilst performing a secret scan. Exception: ", e);
         }
         // Fail-safe, catch anything here intentionally so it doesn't bubble-up any further
         catch (Exception e) {
-            log.error("ERROR: HasSecretMergeCheck has check for secrets. An unexpected exception occurred: ", e);
+            log.error("ERROR: HasSecretMergeCheck has failed to check for secrets due to an unexpected exception: ", e);
         }
 
         return RepositoryHookResult.accepted();

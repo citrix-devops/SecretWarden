@@ -3,6 +3,7 @@ package com.cyanoth.secretwarden.config.REST;
 import com.atlassian.bitbucket.AuthorisationException;
 import com.atlassian.bitbucket.permission.Permission;
 import com.atlassian.bitbucket.permission.PermissionValidationService;
+import com.atlassian.bitbucket.rest.RestErrorMessage;
 import com.atlassian.plugin.spring.scanner.annotation.component.Scanned;
 import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
 import com.cyanoth.secretwarden.config.MatchRuleSetCache;
@@ -18,6 +19,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Collection;
 
+/**
+ * Exposed REST endpoints to modify global configuration of the plugin (for administrators)
+ *
+ * [1] https://developer.atlassian.com/server/framework/atlassian-sdk/rest-plugin-module/
+ */
 @Path("/globalconfig")
 @Scanned
 public class GlobalConfig  {
@@ -67,49 +73,62 @@ public class GlobalConfig  {
     @PUT
     @Path("/match-secret-rule/{rule_number}")
     @Consumes({MediaType.APPLICATION_JSON})
-    public Response updateMatchSecretRule(@PathParam("identifier") String identifier) {
+    public Response updateMatchSecretRule(@PathParam("rule_number") int ruleNumber) {
 
         // TODO: updateMatchSecretRule
+
+        log.debug("Updating rule");
 
 
         return Response.ok("Updated ").build();
     }
 
     @POST
-    @Path("/match-secret-rule/{identifier}")
-    public Response createMatchSecretRule(@PathParam("identifier") String identifier) {
+    @Path("/match-secret-rule/{rule_number}")
+    public Response createMatchSecretRule(@PathParam("rule_number") int ruleNumber) {
 
         // TODO: createMatchSecretRule
 
         return Response.ok("Created").build();
     }
 
-
-    @DELETE
-    @Path("/match-secret-rule/{identifier}")
-    public Response deleteMatchSecretRule(@PathParam("identifier") String identifier) {
-        return Response.status(400).build();
-    }
-
     @PUT
     @Path("/clear-result-cache")
     public Response clearResultCache() {
-
         try {
             this.permissionValidationService.validateForGlobal(Permission.ADMIN);
-            pullRequestSecretScanResultCache.clear();
-            return Response.ok("The secret result cache has been cleared!").build();
+            try {
+                log.debug("Clearing SecretWarden Result Cache...");
+                pullRequestSecretScanResultCache.clear();
+                return Response.ok("The secret result cache has been cleared!").build();
+            }
+            catch (Exception e) {
+                log.error("Failed to clear SecretWarden result cache! An error occurred.", e);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new RestErrorMessage("The secret result cache has NOT been cleared. " +
+                        "An error occurred, see server-logs for more information")).build();
+            }
         } catch (AuthorisationException e) {
-            return responseForNonAdmin();
+            return Response.status(Response.Status.FORBIDDEN).build();
         }
     }
 
-    public void checkAdminPermission() throws AuthorisationException {
-        this.permissionValidationService.validateForGlobal(Permission.ADMIN);
+    @PUT
+    @Path("/reload-ruleset")
+    public Response reloadRuleSet() {
+        try {
+            this.permissionValidationService.validateForGlobal(Permission.ADMIN);
+            try {
+                log.debug("Reloading MatchSecretRuleSet...");
+                matchRuleSetCache.reloadRuleSet();
+                return Response.ok("SecretWarden MatchSecretRuleSet reloaded!").build();
+            }
+            catch (Exception e) {
+                log.error("Failed to reload SecretWarden ruleset. An error occurred.", e);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new RestErrorMessage("The SecretWarden MatchRuleSet has NOT been reloaded." +
+                        "An error occurred, see server-logs for more information")).build();
+            }
+        } catch (AuthorisationException e) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
     }
-
-    public Response responseForNonAdmin() {
-        return Response.status(Response.Status.FORBIDDEN).build();
-    }
-
 }
