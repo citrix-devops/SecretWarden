@@ -82,7 +82,7 @@ public class MatchRuleSetCache {
             // Intentionally load into a temporary local variable, incase an error occurs, the cache doesn't get replaced
             MatchRuleSet ruleSet = new MatchRuleSet();
             ruleSet.putAllRules(getDefaultRuleSet());
-            ruleSet.putAllRules(getCustomRuleSet());
+            ruleSet.putAllRules(getCustomRuleSet(ruleSet));
 
             cache().removeAll();
             cache().put(RULESET_KEY, ruleSet);
@@ -131,8 +131,98 @@ public class MatchRuleSetCache {
         }
     }
 
-    private Set<MatchRule> getCustomRuleSet() throws RuleSetLoadException {
-        // Not Yet Implemented
-        return new HashSet<>();
+    /**
+     * Loads rules which are NOT in the plugin default rule files, these are rules stored in plugin settings added
+     * by the user.
+     * @param currentLoadedRuleset Previously loaded rules (i.e default ruleset) so they are skipped and not loaded again
+     * @return Set of User added rules
+     * @throws RuleSetLoadException Exception which meant the custom ruleset could not be loaded.
+     */
+    private Set<MatchRule> getCustomRuleSet(MatchRuleSet currentLoadedRuleset) throws RuleSetLoadException {
+        try {
+            log.debug("Loading the user custom ruleset");
+            final Set<MatchRule> ruleCollector = new HashSet<>();
+
+            int ruleNumber = 1;
+
+            while (true) {
+                if (currentLoadedRuleset.getRule(ruleNumber) != null) {
+                    log.debug(String.format("Rule # %d is already loaded (default?)", ruleNumber));
+                } else {
+                    log.debug(String.format("Rule # %d is not loaded, checking in the settings", ruleNumber));
+
+                    if (matchRuleSettings.getRuleNameOrDefault(ruleNumber, null) != null) {
+                        try {
+                            MatchRule incomingRule = new MatchRule(
+                                    ruleNumber,
+                                    matchRuleSettings.getRuleNameOrDefault(ruleNumber, "unknown"),
+                                    matchRuleSettings.getRulePatternOrDefault(ruleNumber, ""),
+                                    matchRuleSettings.getRuleEnabledOrDefault(ruleNumber, false));
+
+                            ruleCollector.add(incomingRule);
+                        }
+                        catch (Exception e) {
+                            log.warn("An exception occurred trying to load a default rule: Exception", e);
+                        }
+                    }
+                    else {
+                        break;
+                    }
+                }
+                ruleNumber++;
+            }
+            return ruleCollector;
+        }
+        catch (Exception e) {
+            throw new RuleSetLoadException("CustomRuleSet", e);
+        }
+    }
+
+    public boolean createNewRule(String ruleName, String rulePattern, Boolean ruleEnabled) {
+        synchronized (this) {
+            int newRuleNumber = getFirstNonExistentRuleNumber();
+
+            log.debug(String.format("Creating new rule: # %d, Name: %s Pattern: %s Enabled: %s",
+                    newRuleNumber, ruleName, rulePattern, ruleEnabled));
+
+            try {
+                // The validate function is also called in set functions too but this duplicated call is
+                // necessary for creating rules so to 'ensure' all properties can be created without rollback.
+                matchRuleSettings.validateRuleName(ruleName);
+                matchRuleSettings.validateRulePattern(rulePattern);
+
+                matchRuleSettings.setRuleName(newRuleNumber, ruleName);
+                matchRuleSettings.setRulePattern(newRuleNumber, rulePattern);
+                matchRuleSettings.setRuleEnabled(newRuleNumber, ruleEnabled);
+                return true;
+            } catch (IllegalArgumentException e) {
+                log.error("Failed to set create rule due to validation error: " + e.getMessage());
+            }
+            return false;
+        }
+    }
+
+
+    /**
+     * Find the first rule number that does not exist in plugin settings.
+     * @return Integer. The first instance of a rule number that does not exist.
+     */
+    private int getFirstNonExistentRuleNumber() {
+        int nextRuleNumber = 1;
+
+        while (true) {
+            if (matchRuleSettings.getRuleEnabledOrDefault(nextRuleNumber, null) == null) {
+                log.debug(String.format("Rule number: %d does not exist in settings (may be default rule).", nextRuleNumber));
+
+                // Default rules may not exist in settings if the user has changed them, so check cache.
+                if (getRuleSet().getRule(nextRuleNumber) == null) {
+                    log.debug(String.format("Rule number: %d does not exist in cache (may be default rule).", nextRuleNumber));
+                    return nextRuleNumber;
+                }
+            }
+
+            log.debug(String.format("Rule number: %d already exists.", nextRuleNumber));
+            nextRuleNumber++;
+        }
     }
 }

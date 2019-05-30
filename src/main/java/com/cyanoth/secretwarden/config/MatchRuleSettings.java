@@ -35,34 +35,14 @@ public class MatchRuleSettings {
     @Autowired
     public MatchRuleSettings(@ComponentImport final PluginSettingsFactory pluginSettingsFactory) {
         this.pluginSettings = pluginSettingsFactory.createSettingsForKey(SETTINGS_NAMESPACE);
-
     }
 
-    public boolean createRule(String ruleName, String rulePattern, Boolean ruleEnabled) throws IllegalArgumentException {
-        synchronized (this) {
-            int newRuleNumber = getFirstNonExistentRuleNumber();
-
-            log.debug(String.format("Creating new rule: #%d, Name: %s Pattern: %s Enabled: %s"),
-                    newRuleNumber, ruleName, rulePattern, ruleEnabled);
-
-            try {
-                // The validate function is also called in set functions too but this duplicated call is
-                // necessary for creating rules so to 'ensure' all properties can be created without rollback.
-                validateRuleName(ruleName);
-                validateRulePattern(rulePattern);
-
-                setRuleName(newRuleNumber, ruleName);
-                setRulePattern(newRuleNumber, rulePattern);
-                setRuleEnabled(newRuleNumber, ruleEnabled);
-                return true;
-            }
-            catch (IllegalArgumentException e){
-                log.error("Failed to set create rule due to validation error: " + e.getMessage());
-            }
-            return false;
-        }
-    }
-
+    /**
+     * Updates the rule name in plugin settings
+     * @param ruleNumber The unique rule number to update the value of
+     * @param ruleName The new friendly name of the rule
+     * @return True if the rule name is updated. False otherwise
+     */
     public boolean setRuleName(@NotNull int ruleNumber, @NotNull String ruleName) {
         try {
             validateRuleName(ruleName);
@@ -77,6 +57,13 @@ public class MatchRuleSettings {
         return false;
     }
 
+    /**
+     * Update the pattern of an existing rule in plugin settings
+     * @param ruleNumber The unique rule identifier number to update
+     * @param rulePattern The regular expression pattern (String) to update to
+     * @return True if successful, false otherwise.
+     * @throws IllegalArgumentException Update pattern to did not pass validation
+     */
     public boolean setRulePattern(@NotNull int ruleNumber, @NotNull String rulePattern) throws IllegalArgumentException {
         try {
             validateRulePattern(rulePattern);
@@ -91,20 +78,36 @@ public class MatchRuleSettings {
         return false;
     }
 
+    /**
+     * Update whether or not a rule is enabled (used for scanning)
+     * @param ruleNumber The unique rule identifier number to update
+     * @param ruleEnabled True - the rule should be used. False otherwise
+     * @return True, rule enabled was changed successfully.
+     */
     public boolean setRuleEnabled(@NotNull int ruleNumber, @NotNull Boolean ruleEnabled) {
         String key = getRuleKeyName(ruleNumber, KEY_APPENDIX_ENABLED);
         pluginSettings.put(key, ruleEnabled.toString());
-        log.debug(String.format("Set rule pattern for Rule #: %d Key: %s Value: %s", ruleNumber, key, ruleEnabled.toString()));
+        log.debug(String.format("Set rule enabled for Rule #: %d Key: %s Value: %s", ruleNumber, key, ruleEnabled.toString()));
         return true;
     }
 
-    private void validateRuleName(String ruleName) throws IllegalArgumentException {
+    /**
+     * Ensure that the change to rulename passes validation.
+     * @param ruleName The name of the rule to validate
+     * @throws IllegalArgumentException Rule name did not pass validation. Includes explanation why
+     */
+    public void validateRuleName(String ruleName) throws IllegalArgumentException {
         if (ruleName.length() <= MIN_STRING_CHARACTERS || ruleName.length() > MAX_RULENAME_CHARACTERS)
             throw new IllegalArgumentException(String.format("Rule name length must be greater than %d characters & smaller than %d characters.",
                     MIN_STRING_CHARACTERS, MAX_RULENAME_CHARACTERS));
     }
 
-    private void validateRulePattern(String rulePattern) throws IllegalArgumentException {
+    /**
+     * Ensure that the change to the rule pattern passes validation.
+     * @param rulePattern The pattern of the rule to validate
+     * @throws IllegalArgumentException Rule pattern did not pass validation. Includes explanation why.
+     */
+    public void validateRulePattern(String rulePattern) throws IllegalArgumentException {
          if (rulePattern.length() <= MIN_STRING_CHARACTERS || rulePattern.length() > MAX_RULEPATTERN_CHARACTERS)
             throw new IllegalArgumentException(String.format("Rule pattern length must be greater than %d characters & smaller than %d characters.",
                     MIN_STRING_CHARACTERS, MAX_RULENAME_CHARACTERS));
@@ -112,29 +115,48 @@ public class MatchRuleSettings {
         // Naively, we trust that the user has put a valid regex expression. Should consider changing that.
     }
 
+    /**
+     * Get the rule name of a rule identified by the number in settings. Returns a default value if rule is not found.
+     * @param ruleNumber The rule number to get the name of
+     * @param defaultValue The value to return if the rule was not found
+     * @return Value of the rule name or defaultValue if not found
+     */
     public String getRuleNameOrDefault(@NotNull int ruleNumber, @Nullable String defaultValue) {
         String ruleName = (String) pluginSettings.get(getRuleKeyName(ruleNumber, KEY_APPENDIX_NAME));
         return (ruleName == null) ? defaultValue : ruleName;
     }
 
+    /**
+     * Get the rule pattern of a rule identified by the number in settings. Returns a default value if rule is not found.
+     * @param ruleNumber The rule number to get the name of
+     * @param defaultValue The value to return if the rule was not found
+     * @return Value of the rule name or defaultValue if not found
+     */
     public String getRulePatternOrDefault(@NotNull int ruleNumber, @Nullable String defaultValue) {
         String rulePattern = (String) pluginSettings.get(getRuleKeyName(ruleNumber, KEY_APPENDIX_PATTERN));
         return (rulePattern == null) ? defaultValue : rulePattern;
     }
 
+    /**
+     * Get whether or not a rule is enabled in settings. Returns a default value if rule is not found.
+     * @param ruleNumber The rule number to get the name of
+     * @param defaultValue The value to return if the rule was not found
+     * @return Value of the rule name or defaultValue if not found
+     */
     public Boolean getRuleEnabledOrDefault(@NotNull int ruleNumber, @Nullable Boolean defaultValue) {
         String ruleEnabled = (String) pluginSettings.get(getRuleKeyName(ruleNumber, KEY_APPENDIX_ENABLED));
         return (ruleEnabled == null) ? defaultValue : Boolean.valueOf(ruleEnabled);
     }
 
-
+    /**
+     * Internal function to get a unique key identifier in plugin settings
+     * @param ruleNumber The rule number to get key for
+     * @param appendix Append a hardcoded string to identify the type of setting.
+     * @return String that is a unique key for the plugin setting rule.
+     */
     private String getRuleKeyName(int ruleNumber, String appendix) {
         return SETTINGS_NAMESPACE + KEY_RULE_PREFIX + ruleNumber + appendix;
     }
 
-    private int getFirstNonExistentRuleNumber() {
-        int nextRuleNumber = 0;
 
-        return 123;
-    }
 }

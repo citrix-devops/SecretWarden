@@ -6,7 +6,6 @@ import com.cyanoth.secretwarden.SecretScanner;
 
 /**
  * Secret Scanner for scanning Repositories
- * Not Yet Implemented
  */
 public class RepositorySecretScanner implements SecretScanner {
 

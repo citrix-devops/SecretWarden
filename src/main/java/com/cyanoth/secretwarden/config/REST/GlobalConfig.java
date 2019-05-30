@@ -45,6 +45,11 @@ public class GlobalConfig  {
 
     }
 
+    /**
+     * Retrieve information about a single match secret rule identified by a number
+     * @param ruleNumber The unique number of the rule to get information about
+     * @return JSON representation of a single MatchSecretRule. 404 if not found.
+     */
     @GET
     @Path("/match-secret-rule/{rule_number}")
     @Produces({ MediaType.APPLICATION_JSON })
@@ -58,6 +63,9 @@ public class GlobalConfig  {
         }
     }
 
+    /**
+     * @return JSON representation of all MatchSecretRule currently loaded in the cache
+     */
     @GET
     @Path("/match-secret-rule")
     @Produces({ MediaType.APPLICATION_JSON })
@@ -71,19 +79,11 @@ public class GlobalConfig  {
         }
     }
 
-    @PUT
-    @Path("/match-secret-rule")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.TEXT_PLAIN })
-    public Response updateMatchSecretRule(MatchRule incomingRule) {
-
-        // TODO: Create a rule
-
-        log.debug("I'm here");
-
-        return Response.ok("Updated ").build();
-    }
-
+     /**
+     * Creates or updates an existing match secret rule
+     * @param incomingRule Required, matching JSON data representation of a new MatchSecretRule.
+     * @return Response 200 if the rule has been updated & reloaded successfully. HTTP error otherwise.
+     */
     @POST
     @Path("/match-secret-rule")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -92,25 +92,33 @@ public class GlobalConfig  {
             this.permissionValidationService.validateForGlobal(Permission.ADMIN);
 
             try {
-                int ruleNumber = incomingRule.getRuleNumber();
-                String newFriendlyName = incomingRule.getFriendlyName();
-                String newRegexPattern = incomingRule.getCompiledRegexPattern().toString();
-                Boolean newIsEnabled = incomingRule.getIsEnabled();
+                if (incomingRule.getRuleNumber() == 0) { // Creating a new rule
+                    log.debug("Creating new rule");
+                    matchRuleSetCache.createNewRule(incomingRule.getFriendlyName(),
+                            incomingRule.getCompiledRegexPattern().toString(),true);
 
-                log.info(String.format("Updating a MatchSecret Rule: Number: %d Name: %s Pattern: %s Enabled: %s",
+                    return Response.ok("{ \"id\": \"1\" }").build(); //AJS Restful Table id of the new row (which we don't have)
+                }
+                else {  // Updating an existing rule
+                    int ruleNumber = incomingRule.getRuleNumber();
+                    String newFriendlyName = incomingRule.getFriendlyName();
+                    String newRegexPattern = incomingRule.getCompiledRegexPattern().toString();
+                    Boolean newIsEnabled = incomingRule.getIsEnabled();
+
+                    log.info(String.format("Updating a MatchSecret Rule: Number: %d Name: %s Pattern: %s Enabled: %s",
                         ruleNumber, newFriendlyName, newRegexPattern, newIsEnabled.toString()));
 
-                matchRuleSettings.setRuleEnabled(ruleNumber, newIsEnabled);
-                matchRuleSettings.setRuleName(ruleNumber, newFriendlyName);
-                matchRuleSettings.setRulePattern(ruleNumber, newRegexPattern);
+                    matchRuleSettings.setRuleEnabled(ruleNumber, newIsEnabled);
+                    matchRuleSettings.setRuleName(ruleNumber, newFriendlyName);
+                    matchRuleSettings.setRulePattern(ruleNumber, newRegexPattern);
+                    reloadRuleSet();
+                    return Response.ok("{}").build(); //AJS Restful Table response >requires< JSON response as the OK
+                }
 
-                reloadRuleSet();
-
-                return Response.ok("{}").build(); //AJS Restful Table response requires JSON response as OK
             }
             catch (Exception e) {
-                log.error("Failed to update a MatchRule. An error occurred.", e);
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new RestErrorMessage("Failed to update MatchSecret Rule." +
+                log.error("Failed to update a MatchRule. An error occurred:", e);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new RestErrorMessage("Failed to update MatchSecretRule." +
                         "An error occurred, see server-logs for more information")).build();
             }
 
@@ -119,6 +127,9 @@ public class GlobalConfig  {
         }
     }
 
+    /**
+     * @return Response 200 if the secret scan result cache has been cleared. HTTP error otherwise.
+     */
     @PUT
     @Path("/clear-result-cache")
     @Produces({ MediaType.TEXT_PLAIN })
@@ -140,6 +151,9 @@ public class GlobalConfig  {
         }
     }
 
+    /**
+     * @return Response 200 if the ruleset has been reloaded. HTTP error otherwise.
+     */
     @PUT
     @Path("/reload-ruleset")
     @Produces({ MediaType.TEXT_PLAIN })

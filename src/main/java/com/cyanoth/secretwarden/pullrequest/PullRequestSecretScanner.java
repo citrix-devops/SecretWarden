@@ -31,7 +31,6 @@ public class PullRequestSecretScanner implements SecretScanner {
     }
 
     /**
-     *
      * @param force Do not check cache. Scan even if the result is in the cache
      * @return Results of the secret scan (including but not limited to, found secrets & pull request last updated)
      * @throws SecretScanException An handled exception occurred during the scan but means results are incomplete

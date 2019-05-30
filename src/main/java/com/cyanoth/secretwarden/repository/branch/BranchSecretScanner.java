@@ -6,7 +6,6 @@ import com.cyanoth.secretwarden.SecretScanner;
 
 /**
  * Secret Scanner for scanning repository branches.
- * Not Yet Implemented
  */
 public class BranchSecretScanner implements SecretScanner {
     @Override

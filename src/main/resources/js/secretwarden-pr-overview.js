@@ -15,7 +15,6 @@ define('SecretWarden/PullRequestUIOverview', [
         exports) {
         'use strict';
 
-
         // On an open pull-request, poll the REST Endpoint every 500ms to check the secret scan status.
         // This can be not found, in progress, failed, completed. Each case should be handled appropriately.
         var CHECK_INTERVAL = 500;
@@ -40,7 +39,8 @@ define('SecretWarden/PullRequestUIOverview', [
                     }
                 },
                 statusCode: {
-                    500: false // Stop bitbucket default error handling
+                    500: false, // Stop bitbucket default error handling on failure
+                    404: false // Stop bitbucket default error handling on missing results
                 }
             });
 
@@ -96,9 +96,15 @@ define('SecretWarden/PullRequestUIOverview', [
             checkScanStatus = setInterval(getScanStatusPoller, 500);
         }
 
+        exports.isPullRequestOpen = function(context) {
+            var pr = (context['pullRequest']).toJSON();
+            console.log(pr);
+            return pr.state === 'OPEN';
+        };
+
         exports.showSecretScanPROverview = function (context) {
             start();
-        return {};
-    };
+            return {};
+        };
 
 });

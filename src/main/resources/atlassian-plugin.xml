@@ -38,7 +38,12 @@
 
         <resource name="view" type="soy" location="com.cyanoth.secretwarden:secretwarden-pullrequest-ui-res/com.cyanoth.secretwarden.panel" />
         <client-context-provider>require('SecretWarden/PullRequestUIOverview').showSecretScanPROverview</client-context-provider>
-        <!--<client-condition>TODO</client-condition>-->
+
+          <!-- Only display the statistics panel on OPEN pull requests (pre-merge) -->
+         <client-condition>function(context) { return context['pullRequest'].state === 'OPEN' }</client-condition>
+
+        <!-- Check whether the Merge Check is enabled or not -->
+        <condition class="com.cyanoth.secretwarden.conditions.PullRequestMergeCheckEnabled" />
 
         <dependency>com.cyanoth.secretwarden:secretwarden-pullrequest-ui-res</dependency>
     </client-web-panel>

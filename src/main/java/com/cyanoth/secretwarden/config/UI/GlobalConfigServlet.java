@@ -13,6 +13,7 @@ import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
 import com.atlassian.sal.api.auth.LoginUriProvider;
 import com.atlassian.sal.api.user.UserKey;
 import com.atlassian.sal.api.user.UserManager;
+import com.atlassian.sal.api.user.UserRole;
 import com.atlassian.soy.renderer.SoyTemplateRenderer;
 import com.atlassian.webresource.api.assembler.PageBuilderService;
 
@@ -48,7 +49,7 @@ public class GlobalConfigServlet extends HttpServlet
     UserKey userKey = userManager.getRemoteUserKey(request);
     if (userKey == null || !userManager.isAdmin(userKey))
     {
-      response.sendRedirect(this.loginUriProvider.getLoginUri(this.getUri(request)).toASCIIString());
+      response.sendRedirect(this.loginUriProvider.getLoginUriForRole(this.getUri(request), UserRole.ADMIN).toASCIIString());
     }
 
     response.setContentType("text/html;charset=UTF-8");

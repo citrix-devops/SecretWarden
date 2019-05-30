@@ -59,9 +59,7 @@ define('SecretWarden/GlobalConfig', [
 
     var CheckboxCreateView = AJS.RestfulTable.CustomCreateView.extend({
         render: function (self) {
-            var $select = $("<input type='checkbox' checked class='ajs-restfultable-input-"  + self.name + "' />" +
-                "<input type='hidden' name='" + self.name + "'/>");
-            return $select;
+            return true;
         }
     });
 
@@ -73,6 +71,8 @@ define('SecretWarden/GlobalConfig', [
 
             var $select = $("<input type='checkbox' " + attrChecked + " class='ajs-restfultable-input-" + self.name + "' />" +
                 "<input type='hidden' name='" + self.name + "'/>");
+
+            $select.val(self.value);
 
             $select.change(function() {
                 if ($select.is(":checked")) {
@@ -89,7 +89,6 @@ define('SecretWarden/GlobalConfig', [
     });
     var CheckboxReadView = AJS.RestfulTable.CustomReadView.extend({
         render: function (self) {
-
             var attrChecked = "";
             if (self.value === true)
                 attrChecked = "checked";

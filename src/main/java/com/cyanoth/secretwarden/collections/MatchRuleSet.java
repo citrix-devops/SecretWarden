@@ -1,9 +1,8 @@
 package com.cyanoth.secretwarden.collections;
 
 import com.cyanoth.secretwarden.structures.MatchRule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
@@ -13,7 +12,6 @@ import java.util.HashMap;
  * Must implement Serializable to be cluster-safe & ensuring that upon reload (config change) - every node will have the same ruleset.
  */
 public class MatchRuleSet implements Serializable {
-    private static final Logger log = LoggerFactory.getLogger(MatchRuleSet.class);
 
     private HashMap<Integer, MatchRule> matchRules = new HashMap<>();
 
@@ -27,6 +25,7 @@ public class MatchRuleSet implements Serializable {
         }
     }
 
+    @Nullable
     public MatchRule getRule(int ruleNumber) {
         return matchRules.get(ruleNumber);
     }

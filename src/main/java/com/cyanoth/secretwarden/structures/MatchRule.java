@@ -26,12 +26,10 @@ public class MatchRule implements Serializable {
         this.enabled = enabled;
     }
 
-    @NotNull
     public String getFriendlyName() {
         return friendlyName;
     }
 
-    @NotNull
     public Pattern getCompiledRegexPattern() {
         if (compiledRegexPattern == null) {
             compiledRegexPattern = Pattern.compile(regexPattern);
@@ -40,8 +38,7 @@ public class MatchRule implements Serializable {
         return compiledRegexPattern;
     }
 
-    @NotNull
-    public int getRuleNumber() {
+    public Integer getRuleNumber() {
         return ruleNumber;
     }
 
