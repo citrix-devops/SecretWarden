@@ -19,6 +19,7 @@ import java.util.Map;
 
 /**
  * A custom condition to check whether or not the HasSecretMergeCheck hook is enabled on a repository.
+ * Used primarily for UI elements, to check whether or not they should be displayed.
  */
 @Scanned
 public class PullRequestMergeCheckEnabled implements Condition {
