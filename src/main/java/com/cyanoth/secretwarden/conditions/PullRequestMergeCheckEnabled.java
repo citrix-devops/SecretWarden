@@ -2,8 +2,11 @@ package com.cyanoth.secretwarden.conditions;
 
 import com.atlassian.bitbucket.hook.repository.RepositoryHook;
 import com.atlassian.bitbucket.hook.repository.RepositoryHookService;
+import com.atlassian.bitbucket.permission.Permission;
 import com.atlassian.bitbucket.repository.Repository;
 import com.atlassian.bitbucket.scope.RepositoryScope;
+import com.atlassian.bitbucket.user.SecurityService;
+import com.atlassian.bitbucket.util.Operation;
 import com.atlassian.plugin.PluginParseException;
 import com.atlassian.plugin.spring.scanner.annotation.component.Scanned;
 import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
@@ -22,10 +25,13 @@ public class PullRequestMergeCheckEnabled implements Condition {
     private static final Logger log = LoggerFactory.getLogger(PullRequestMergeCheckEnabled.class);
     private static final String HOOK_KEY = "com.cyanoth.secretwarden:has-secret-pr-merge-check";
     private final RepositoryHookService repositoryHookService;
+     private final SecurityService securityService;
 
     @Inject
-    public PullRequestMergeCheckEnabled(@ComponentImport final RepositoryHookService repositoryHookService) {
+    public PullRequestMergeCheckEnabled(@ComponentImport final RepositoryHookService repositoryHookService,
+                                        @ComponentImport final SecurityService securityService) {
         this.repositoryHookService = repositoryHookService;
+        this.securityService = securityService;
     }
 
     @Override
@@ -44,7 +50,18 @@ public class PullRequestMergeCheckEnabled implements Condition {
             return false;
         }
 
-        RepositoryHook hook = repositoryHookService.getByKey(new RepositoryScope((Repository) obj), HOOK_KEY);
-        return hook != null && hook.isEnabled();
+        try {
+            // We have to escalate to repository administrator level to check whether or not the merge check is enabled.
+            return this.securityService.withPermission(Permission.REPO_ADMIN, "Retrieving Merge Check Status")
+            .call(
+                    (Operation<Boolean, Exception>) () -> {
+                        RepositoryHook hook = repositoryHookService.getByKey(new RepositoryScope((Repository) obj), HOOK_KEY);
+                        return hook != null && hook.isEnabled();
+                    });
+        }
+        catch (Exception e) {
+            log.error("Failed to get SecretWarden Merge Check state. Assuming disabled.", e);
+            return false;
+        }
     }
 }
