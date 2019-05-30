@@ -55,7 +55,7 @@ class DiffMatcher extends AbstractDiffContentCallback {
 
     @Override
     public void onHunkStart(int srcLine, int srcSpan, int dstLine, int dstSpan, @Nullable String context) {
-        lineCounter = dstLine;
+        lineCounter = dstLine - 1; // Always off-by-one, so fix it
         sourceContext = context;
     }
 
