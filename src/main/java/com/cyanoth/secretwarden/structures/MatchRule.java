@@ -32,7 +32,7 @@ public class MatchRule implements Serializable {
 
     public Pattern getCompiledRegexPattern() {
         if (compiledRegexPattern == null) {
-            compiledRegexPattern = Pattern.compile(regexPattern);
+            compiledRegexPattern = Pattern.compile(regexPattern, Pattern.CASE_INSENSITIVE);
         }
 
         return compiledRegexPattern;
