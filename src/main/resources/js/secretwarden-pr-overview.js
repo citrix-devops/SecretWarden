@@ -15,6 +15,8 @@ define('SecretWarden/PullRequestUIOverview', [
         exports) {
         'use strict';
 
+        var onLinkClickHasBeenSet = false;
+
         // On an open pull-request, poll the REST Endpoint every 500ms to check the secret scan status.
         // This can be not found, in progress, failed, completed. Each case should be handled appropriately.
         var CHECK_INTERVAL = 500;
@@ -82,12 +84,18 @@ define('SecretWarden/PullRequestUIOverview', [
 
         // When secret have been found, handle on click so that they are displayed in a dialog
         function setOnClickHandler(foundSecrets) {
-            $(document).one('click', '.secretwarden-overview-link', function (e) {
+
+            if (onLinkClickHasBeenSet)
+                return;
+
+            $(document).on('click', '.secretwarden-overview-link .label', function (e) {
                 e.preventDefault();
                 console.log(foundSecrets);
                 var dialog = AJS.dialog2($(com.cyanoth.secretwarden.overviewDialog({foundSecrets: foundSecrets})));
                 dialog.show();
             });
+
+            onLinkClickHasBeenSet = true;
         }
 
         // Start a timer to poll the secret scan result
