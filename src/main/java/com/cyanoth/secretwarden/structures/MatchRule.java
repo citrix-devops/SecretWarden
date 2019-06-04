@@ -1,7 +1,6 @@
 package com.cyanoth.secretwarden.structures;
 
 import org.codehaus.jackson.annotate.JsonProperty;
-
 import java.io.Serializable;
 import java.util.regex.Pattern;
 
@@ -22,7 +21,6 @@ public class MatchRule implements Serializable {
         this.ruleNumber = ruleNumber;
         this.friendlyName = friendlyName;
         this.regexPattern = regexPattern;
-        this.compiledRegexPattern = Pattern.compile(regexPattern, Pattern.CASE_INSENSITIVE);
         this.enabled = enabled;
     }
 
@@ -31,6 +29,10 @@ public class MatchRule implements Serializable {
     }
 
     public Pattern getCompiledRegexPattern() {
+        // Incase THIS object gets deserialized (constructor isn't called). The compiled pattern might not be initialised.
+        if (compiledRegexPattern == null)
+            compiledRegexPattern = Pattern.compile(regexPattern, Pattern.CASE_INSENSITIVE);
+
         return compiledRegexPattern;
     }
 
