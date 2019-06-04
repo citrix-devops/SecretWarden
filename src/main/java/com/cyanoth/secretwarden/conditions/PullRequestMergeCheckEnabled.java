@@ -26,7 +26,7 @@ public class PullRequestMergeCheckEnabled implements Condition {
     private static final Logger log = LoggerFactory.getLogger(PullRequestMergeCheckEnabled.class);
     private static final String HOOK_KEY = "com.cyanoth.secretwarden:has-secret-pr-merge-check";
     private final RepositoryHookService repositoryHookService;
-     private final SecurityService securityService;
+    private final SecurityService securityService;
 
     @Inject
     public PullRequestMergeCheckEnabled(@ComponentImport final RepositoryHookService repositoryHookService,
@@ -53,7 +53,7 @@ public class PullRequestMergeCheckEnabled implements Condition {
 
         try {
             // We have to escalate to repository administrator level to check whether or not the merge check is enabled.
-            return this.securityService.withPermission(Permission.REPO_ADMIN, "Retrieving Merge Check Status")
+            return this.securityService.withPermission(Permission.REPO_ADMIN, "SecretWarden Retrieving Merge Check State")
             .call(
                     (Operation<Boolean, Exception>) () -> {
                         RepositoryHook hook = repositoryHookService.getByKey(new RepositoryScope((Repository) obj), HOOK_KEY);
