@@ -136,9 +136,11 @@ define('SecretWarden/GlobalConfig', [
 
 
         var createRow = restTable.getCreateRow();
-            createRow.bind(AJS.RestfulTable.Events.CREATED, function () {
-                invokeReloadRuleSet();
-                location.reload(); // Need to do this until we find a way to return the newly created rule ID back to the client.
+        createRow.bind(AJS.RestfulTable.Events.CREATED, function () {
+            // Need to do this until we find a way to reliably reload & return the newly created rule ID back to the client.
+            invokeReloadRuleSet();
+            invokeClearCache();
+            location.reload();
         });
 
     }
