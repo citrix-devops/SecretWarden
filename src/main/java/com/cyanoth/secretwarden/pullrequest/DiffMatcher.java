@@ -70,7 +70,7 @@ class DiffMatcher extends AbstractDiffContentCallback {
             if (!rule.getIsEnabled())
                 continue;
 
-            if (rule.getCompiledRegexPattern().matcher(s).find()) {
+            if (rule.checkMatch(s)) {
                 foundSecrets.add(new FoundSecret(rule.getFriendlyName(), destinationFilePath,
                         sourceContext, lineCounter));
             }

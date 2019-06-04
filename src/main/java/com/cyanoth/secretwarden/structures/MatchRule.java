@@ -2,7 +2,6 @@ package com.cyanoth.secretwarden.structures;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.regex.Pattern;
 
@@ -12,8 +11,8 @@ import java.util.regex.Pattern;
 public class MatchRule implements Serializable {
     private final int ruleNumber;
     private final String friendlyName;
-    private final String regexPattern; // Used on configuration page. Use the pre-compiled compiledRegexPattern elsewhere
-    private transient Pattern compiledRegexPattern = null;
+    private final String regexPattern; // Used only on configuration page. Use the pre-compiled compiledRegexPattern elsewhere
+    private transient Pattern compiledRegexPattern;
     private final Boolean enabled;
 
     public MatchRule(@JsonProperty("ruleNumber") int ruleNumber,
@@ -23,6 +22,7 @@ public class MatchRule implements Serializable {
         this.ruleNumber = ruleNumber;
         this.friendlyName = friendlyName;
         this.regexPattern = regexPattern;
+        this.compiledRegexPattern = Pattern.compile(regexPattern, Pattern.CASE_INSENSITIVE);
         this.enabled = enabled;
     }
 
@@ -31,10 +31,6 @@ public class MatchRule implements Serializable {
     }
 
     public Pattern getCompiledRegexPattern() {
-        if (compiledRegexPattern == null) {
-            compiledRegexPattern = Pattern.compile(regexPattern, Pattern.CASE_INSENSITIVE);
-        }
-
         return compiledRegexPattern;
     }
 
@@ -45,4 +41,14 @@ public class MatchRule implements Serializable {
     public Boolean getIsEnabled() {
         return enabled;
     }
+
+    /**
+     * Check whether a string matches this rule
+     * @param str String to test rule against
+     * @return True. String matches rule. False otherwise.
+     */
+    public Boolean checkMatch(String str) {
+        return this.getCompiledRegexPattern().matcher(str).find();
+    }
+
 }
