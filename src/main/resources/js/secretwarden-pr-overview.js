@@ -67,6 +67,7 @@ define('SecretWarden/PullRequestUIOverview', [
             } else if (secretCount === 0) {
                 linkEle.addClass("nosecrets");
                 labEle.text("No secrets were found");
+                setOnClickHandler(foundSecrets)
             } else {
                 updateOverviewLinkAsFailed();
             }
@@ -90,8 +91,12 @@ define('SecretWarden/PullRequestUIOverview', [
 
             $(document).on('click', '.secretwarden-overview-link .label', function (e) {
                 e.preventDefault();
-                console.log(foundSecrets);
-                var dialog = AJS.dialog2($(com.cyanoth.secretwarden.overviewDialog({foundSecrets: foundSecrets})));
+
+                if (foundSecrets.length > 0)
+                    var dialog = AJS.dialog2($(com.cyanoth.secretwarden.overviewDialog({foundSecrets: foundSecrets})));
+                else
+                    var dialog = AJS.dialog2($(com.cyanoth.secretwarden.noSecretsDialog()));
+
                 dialog.show();
             });
 
