@@ -102,7 +102,7 @@ define('SecretWarden/GlobalConfig', [
     function buildMatchRulesetTable() {
         console.log("Building the MatchSecretRule RESTful table...");
 
-        new AJS.RestfulTable({
+        var restTable = new AJS.RestfulTable({
             el: jQuery("#match-rule-config-table"),
             autoFocus: true,
             allowDelete: false, // DELETE Not yet implemented
@@ -133,6 +133,14 @@ define('SecretWarden/GlobalConfig', [
                 }
             ]
         });
+
+
+        var createRow = restTable.getCreateRow();
+            createRow.bind(AJS.RestfulTable.Events.CREATED, function () {
+                invokeReloadRuleSet();
+                location.reload(); // Need to do this until we find a way to return the newly created rule ID back to the client.
+        });
+
     }
 
     function invokeReloadRuleSet() {
