@@ -25,49 +25,49 @@ import com.atlassian.webresource.api.assembler.PageBuilderService;
 @Scanned
 public class GlobalConfigServlet extends HttpServlet
 {
-  private final UserManager userManager;
-  private final LoginUriProvider loginUriProvider;
-  private SoyTemplateRenderer soyTemplateRenderer;
-  private final PageBuilderService pageBuilderService;
+    private final UserManager userManager;
+    private final LoginUriProvider loginUriProvider;
+    private final SoyTemplateRenderer soyTemplateRenderer;
+    private final PageBuilderService pageBuilderService;
 
 
-  @Inject
-  public GlobalConfigServlet(@ComponentImport UserManager userManager,
-                             @ComponentImport LoginUriProvider loginUriProvider,
-                             @ComponentImport SoyTemplateRenderer soyTemplateRenderer,
-                             @ComponentImport PageBuilderService pageBuilderService)
-  {
-    this.userManager = userManager;
-    this.loginUriProvider = loginUriProvider;
-    this.soyTemplateRenderer = soyTemplateRenderer;
-    this.pageBuilderService = pageBuilderService;
-  }
-
-  @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException
-  {
-    UserKey userKey = userManager.getRemoteUserKey(request);
-    if (userKey == null || !userManager.isAdmin(userKey))
+    @Inject
+    public GlobalConfigServlet(@ComponentImport UserManager userManager,
+                               @ComponentImport LoginUriProvider loginUriProvider,
+                               @ComponentImport SoyTemplateRenderer soyTemplateRenderer,
+                               @ComponentImport PageBuilderService pageBuilderService)
     {
-      response.sendRedirect(this.loginUriProvider.getLoginUriForRole(this.getUri(request), UserRole.ADMIN).toASCIIString());
+        this.userManager = userManager;
+        this.loginUriProvider = loginUriProvider;
+        this.soyTemplateRenderer = soyTemplateRenderer;
+        this.pageBuilderService = pageBuilderService;
     }
 
-    response.setContentType("text/html;charset=UTF-8");
-    this.pageBuilderService.assembler().resources().requireContext("com.cyanoth.secretwarden.globaladmin");
-
-	soyTemplateRenderer.render(response.getWriter(), "com.cyanoth.secretwarden:secretwarden-globalconfig-ui-res",
-	    "com.cyanoth.secretwarden.configPage", null);
-  }
-
-  private URI getUri(HttpServletRequest request)
-  {
-    StringBuffer builder = request.getRequestURL();
-    if (request.getQueryString() != null)
+    @Override
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException
     {
-      builder.append("?");
-      builder.append(request.getQueryString());
+        UserKey userKey = userManager.getRemoteUserKey(request);
+        if (userKey == null || !userManager.isAdmin(userKey))
+        {
+            response.sendRedirect(this.loginUriProvider.getLoginUriForRole(this.getUri(request), UserRole.ADMIN).toASCIIString());
+        }
+
+        response.setContentType("text/html;charset=UTF-8");
+        this.pageBuilderService.assembler().resources().requireContext("com.cyanoth.secretwarden.globaladmin");
+
+        soyTemplateRenderer.render(response.getWriter(), "com.cyanoth.secretwarden:secretwarden-globalconfig-ui-res",
+                "com.cyanoth.secretwarden.configPage", null);
     }
-    return URI.create(builder.toString());
-  }
+
+    private URI getUri(HttpServletRequest request)
+    {
+        StringBuffer builder = request.getRequestURL();
+        if (request.getQueryString() != null)
+        {
+            builder.append("?");
+            builder.append(request.getQueryString());
+        }
+        return URI.create(builder.toString());
+    }
 
 }
