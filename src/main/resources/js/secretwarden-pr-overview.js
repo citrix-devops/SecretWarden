@@ -28,8 +28,20 @@ define('SecretWarden/PullRequestUIOverview', [
                 type: 'GET',
                 async: false,
                 success: function (results, textStatus, jqXHR) {
-                    console.log("SecretWarden scan result has been retrieved successfully! Updating UI elements");
-                    updateOverviewLinkWithResults(results);
+
+                    if (jqXHR.status === 200) {
+
+                        if (results["secretScanStatus"] === "COMPLETED") {
+                            console.log("SecretWarden scan result has been retrieved successfully! Updating UI elements");
+                            updateOverviewLinkWithResults(results);
+                        } else if (results["secretScanStatus"] === "IN_PROGRESS") {
+                            console.log("SecretWarden scan is still inprogress. Will recheck in " + CHECK_INTERVAL + "ms")
+                        } else {
+                            console.log("SecretWarden getScanStatus unknown or failed! Status: " + jqXHR.status + " results:" + results);
+                            updateOverviewLinkAsFailed();
+                        }
+
+                    }
 
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
