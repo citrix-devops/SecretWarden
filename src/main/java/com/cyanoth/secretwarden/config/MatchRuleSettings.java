@@ -25,10 +25,10 @@ public class MatchRuleSettings {
     private final String KEY_APPENDIX_PATTERN = "_pattern";
     private final String KEY_APPENDIX_ENABLED = "_enabled";
 
-    private final int MIN_STRING_CHARACTERS = 3;
-    private final int MAX_RULENAME_CHARACTERS = 100;
-
-    private final int MAX_RULEPATTERN_CHARACTERS = 9000;
+    private final int MIN_RULENAME_CHARS = 3;
+    private final int MAX_RULENAME_CHARS = 100;
+    private final int MIN_RULEPATTERN_CHARS = 3;
+    private final int MAX_RULEPATTERN_CHARS = 9000;
     // Technically, the max value here can be 99000
     // [1] https://docs.atlassian.com/DAC/javadoc/sal/2.6/reference/com/atlassian/sal/api/pluginsettings/PluginSettings.html
 
@@ -43,7 +43,7 @@ public class MatchRuleSettings {
      * @param ruleName The new friendly name of the rule
      * @return True if the rule name is updated. False otherwise
      */
-    public boolean setRuleName(@NotNull int ruleNumber, @NotNull String ruleName) {
+    public boolean setRuleName(int ruleNumber, @NotNull String ruleName) {
         try {
             validateRuleName(ruleName);
             String key = getRuleKeyName(ruleNumber, KEY_APPENDIX_NAME);
@@ -64,7 +64,7 @@ public class MatchRuleSettings {
      * @return True if successful, false otherwise.
      * @throws IllegalArgumentException Update pattern to did not pass validation
      */
-    public boolean setRulePattern(@NotNull int ruleNumber, @NotNull String rulePattern) throws IllegalArgumentException {
+    public boolean setRulePattern(int ruleNumber, @NotNull String rulePattern) throws IllegalArgumentException {
         try {
             validateRulePattern(rulePattern);
             String key = getRuleKeyName(ruleNumber, KEY_APPENDIX_PATTERN);
@@ -84,7 +84,7 @@ public class MatchRuleSettings {
      * @param ruleEnabled True - the rule should be used. False otherwise
      * @return True, rule enabled was changed successfully.
      */
-    public boolean setRuleEnabled(@NotNull int ruleNumber, @NotNull Boolean ruleEnabled) {
+    public boolean setRuleEnabled(int ruleNumber, @NotNull Boolean ruleEnabled) {
         String key = getRuleKeyName(ruleNumber, KEY_APPENDIX_ENABLED);
         pluginSettings.put(key, ruleEnabled.toString());
         log.debug(String.format("Set rule enabled for Rule #: %d Key: %s Value: %s", ruleNumber, key, ruleEnabled.toString()));
@@ -97,9 +97,9 @@ public class MatchRuleSettings {
      * @throws IllegalArgumentException Rule name did not pass validation. Includes explanation why
      */
     public void validateRuleName(String ruleName) throws IllegalArgumentException {
-        if (ruleName.length() <= MIN_STRING_CHARACTERS || ruleName.length() > MAX_RULENAME_CHARACTERS)
+        if (ruleName.length() <= MIN_RULENAME_CHARS || ruleName.length() >= MAX_RULENAME_CHARS)
             throw new IllegalArgumentException(String.format("Rule name length must be greater than %d characters & smaller than %d characters.",
-                    MIN_STRING_CHARACTERS, MAX_RULENAME_CHARACTERS));
+                    MIN_RULENAME_CHARS, MAX_RULENAME_CHARS));
     }
 
     /**
@@ -108,9 +108,9 @@ public class MatchRuleSettings {
      * @throws IllegalArgumentException Rule pattern did not pass validation. Includes explanation why.
      */
     public void validateRulePattern(String rulePattern) throws IllegalArgumentException {
-         if (rulePattern.length() <= MIN_STRING_CHARACTERS || rulePattern.length() > MAX_RULEPATTERN_CHARACTERS)
+         if (rulePattern.length() <= MIN_RULEPATTERN_CHARS || rulePattern.length() >= MAX_RULEPATTERN_CHARS)
             throw new IllegalArgumentException(String.format("Rule pattern length must be greater than %d characters & smaller than %d characters.",
-                    MIN_STRING_CHARACTERS, MAX_RULENAME_CHARACTERS));
+                    MIN_RULEPATTERN_CHARS, MAX_RULEPATTERN_CHARS));
 
         // Naively, we trust that the user has put a valid regex expression. Should consider changing that.
     }
@@ -121,7 +121,7 @@ public class MatchRuleSettings {
      * @param defaultValue The value to return if the rule was not found
      * @return Value of the rule name or defaultValue if not found
      */
-    public String getRuleNameOrDefault(@NotNull int ruleNumber, @Nullable String defaultValue) {
+    public String getRuleNameOrDefault(int ruleNumber, @Nullable String defaultValue) {
         String ruleName = (String) pluginSettings.get(getRuleKeyName(ruleNumber, KEY_APPENDIX_NAME));
         return (ruleName == null) ? defaultValue : ruleName;
     }
@@ -132,7 +132,7 @@ public class MatchRuleSettings {
      * @param defaultValue The value to return if the rule was not found
      * @return Value of the rule name or defaultValue if not found
      */
-    public String getRulePatternOrDefault(@NotNull int ruleNumber, @Nullable String defaultValue) {
+    public String getRulePatternOrDefault(int ruleNumber, @Nullable String defaultValue) {
         String rulePattern = (String) pluginSettings.get(getRuleKeyName(ruleNumber, KEY_APPENDIX_PATTERN));
         return (rulePattern == null) ? defaultValue : rulePattern;
     }
@@ -143,7 +143,7 @@ public class MatchRuleSettings {
      * @param defaultValue The value to return if the rule was not found
      * @return Value of the rule name or defaultValue if not found
      */
-    public Boolean getRuleEnabledOrDefault(@NotNull int ruleNumber, @Nullable Boolean defaultValue) {
+    public Boolean getRuleEnabledOrDefault(int ruleNumber, @Nullable Boolean defaultValue) {
         String ruleEnabled = (String) pluginSettings.get(getRuleKeyName(ruleNumber, KEY_APPENDIX_ENABLED));
         return (ruleEnabled == null) ? defaultValue : Boolean.valueOf(ruleEnabled);
     }
