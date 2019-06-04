@@ -4,8 +4,6 @@ import com.atlassian.plugin.spring.scanner.annotation.component.Scanned;
 import com.cyanoth.secretwarden.pullrequest.PullRequestSecretScanResult;
 import com.cyanoth.secretwarden.pullrequest.PullRequestSecretScanResultCache;
 import com.google.gson.Gson;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -22,7 +20,6 @@ import javax.ws.rs.core.Response;
 @Path("/prscan/result")
 @Scanned
 public class ScanResult{
-    private static final Logger log = LoggerFactory.getLogger(ScanResult.class);
     private final PullRequestSecretScanResultCache pullRequestSecretScanResultCache;
 
     ScanResult(PullRequestSecretScanResultCache pullRequestSecretScanResultCache) {
