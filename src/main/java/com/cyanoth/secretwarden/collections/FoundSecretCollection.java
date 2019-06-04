@@ -16,7 +16,7 @@ public class FoundSecretCollection implements Serializable {
     private final Collection<FoundSecret> foundSecrets;
 
     public FoundSecretCollection() {
-        foundSecrets = new HashSet<FoundSecret>();
+        foundSecrets = new HashSet<>();
     }
 
     public FoundSecretCollection(@NotNull HashSet<FoundSecret> secrets) {
