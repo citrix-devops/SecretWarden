@@ -1,6 +1,12 @@
 package com.cyanoth.secretwarden.pullrequest.REST;
 
+import com.atlassian.bitbucket.AuthorisationException;
+import com.atlassian.bitbucket.permission.Permission;
+import com.atlassian.bitbucket.permission.PermissionService;
+import com.atlassian.bitbucket.repository.Repository;
+import com.atlassian.bitbucket.repository.RepositoryService;
 import com.atlassian.plugin.spring.scanner.annotation.component.Scanned;
+import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
 import com.cyanoth.secretwarden.pullrequest.PullRequestSecretScanResult;
 import com.cyanoth.secretwarden.pullrequest.PullRequestSecretScanResultCache;
 import com.google.gson.Gson;
@@ -20,10 +26,16 @@ import javax.ws.rs.core.Response;
 @Path("/prscan/result")
 @Scanned
 public class ScanResult{
+    private final PermissionService permissionService;
+    private final RepositoryService repositoryService;
     private final PullRequestSecretScanResultCache pullRequestSecretScanResultCache;
 
-    ScanResult(PullRequestSecretScanResultCache pullRequestSecretScanResultCache) {
+    ScanResult(PullRequestSecretScanResultCache pullRequestSecretScanResultCache,
+               @ComponentImport PermissionService permissionService,
+               @ComponentImport RepositoryService repositoryService) {
         this.pullRequestSecretScanResultCache = pullRequestSecretScanResultCache;
+        this.permissionService = permissionService;
+        this.repositoryService = repositoryService;
     }
 
     /**
@@ -39,15 +51,26 @@ public class ScanResult{
     @Path("/{projectKey}/{repoSlug}/{pullRequestId}")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getPullRequestSecretScanResult(@PathParam("projectKey") String projectKey, @PathParam("repoSlug") String repoSlug,
-                                                   @PathParam("pullRequestId") Long pullRequestId)
-    {
-        PullRequestSecretScanResult result = pullRequestSecretScanResultCache.get(projectKey, repoSlug, pullRequestId);
+                                                   @PathParam("pullRequestId") Long pullRequestId) {
+        try {
+            Repository repo = repositoryService.getBySlug(projectKey, repoSlug);
 
-        if (result == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-        else {
-            return Response.ok(new Gson().toJson(result)).build();
+            if (repo == null)
+                return Response.status(Response.Status.NOT_FOUND).build();
+
+            if (!permissionService.hasRepositoryPermission(repo, Permission.REPO_READ)) {
+                return Response.status(Response.Status.FORBIDDEN).build();
+            }
+
+            PullRequestSecretScanResult result = pullRequestSecretScanResultCache.get(projectKey, repoSlug, pullRequestId);
+
+            if (result == null) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            } else {
+                return Response.ok(new Gson().toJson(result)).build();
+            }
+        } catch (AuthorisationException e) {
+            return Response.status(Response.Status.FORBIDDEN).build();
         }
     }
 }
