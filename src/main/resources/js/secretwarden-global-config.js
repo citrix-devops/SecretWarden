@@ -135,14 +135,38 @@ define('SecretWarden/GlobalConfig', [
         });
 
 
-        var createRow = restTable.getCreateRow();
-        createRow.bind(AJS.RestfulTable.Events.CREATED, function () {
+        AJS.$(document).bind(AJS.RestfulTable.Events.EDIT_ROW, function (event,editedRow,table) {
             // Need to do this until we find a way to reliably reload & return the newly created rule ID back to the client.
-            invokeReloadRuleSet();
-            invokeClearCache();
-            location.reload();
+            editedRow.bind(AJS.RestfulTable.Events.UPDATED, function () {
+                invokeFullReload();
+            });
         });
 
+        restTable.getCreateRow().bind(AJS.RestfulTable.Events.CREATED, function () {
+            // Need to do this until we find a way to reliably reload & return the newly created rule ID back to the client.
+            invokeFullReload();
+        });
+
+        restTable.getCreateRow().bind(AJS.RestfulTable.Events.VALIDATION_ERROR, function () {
+            showFailureFlag();
+        });
+
+    }
+
+    function invokeFullReload() {
+        invokeReloadRuleSet();
+        invokeClearCache();
+        location.reload();
+    }
+
+    function showFailureFlag() {
+        AJS.flag({
+            type: 'error',
+            title: 'Failed!',
+            persistent: false,
+            body: 'Failed to create or update a rule because of a server error. Please ensure you entry meets validation requirements ' +
+                'or check server-logs for further information!'
+        });
     }
 
     function invokeReloadRuleSet() {

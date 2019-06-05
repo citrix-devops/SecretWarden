@@ -94,10 +94,13 @@ public class GlobalConfig  {
             try {
                 if (incomingRule.getRuleNumber() == 0) { // Creating a new rule
                     log.debug("Creating new rule");
-                    matchRuleSetCache.createNewRule(incomingRule.getFriendlyName(),
+                    boolean createSuccess = matchRuleSetCache.createNewRule(incomingRule.getFriendlyName(),
                             incomingRule.getCompiledRegexPattern().toString(),true);
 
-                    return Response.ok("{ \"id\": \"1\" }").build(); //AJS Restful Table id of the new row (which we don't have)
+                    if (createSuccess)
+                        return Response.ok("{ \"id\": \"1\" }").build(); //AJS Restful Table id of the new row (which we don't have)
+                    else
+                        throw new Exception("New rule was not created!");
                 }
                 else {  // Updating an existing rule
                     int ruleNumber = incomingRule.getRuleNumber();
@@ -108,17 +111,21 @@ public class GlobalConfig  {
                     log.info(String.format("Updating a MatchSecret Rule: Number: %d Name: %s Pattern: %s Enabled: %s",
                         ruleNumber, newFriendlyName, newRegexPattern, newIsEnabled.toString()));
 
-                    matchRuleSettings.setRuleEnabled(ruleNumber, newIsEnabled);
-                    matchRuleSettings.setRuleName(ruleNumber, newFriendlyName);
-                    matchRuleSettings.setRulePattern(ruleNumber, newRegexPattern);
+                    boolean ruleEnableSuccess = matchRuleSettings.setRuleEnabled(ruleNumber, newIsEnabled);
+                    boolean ruleNameSuccess = matchRuleSettings.setRuleName(ruleNumber, newFriendlyName);
+                    boolean rulePatternSuccess = matchRuleSettings.setRulePattern(ruleNumber, newRegexPattern);
                     reloadRuleSet();
-                    return Response.ok("{}").build(); //AJS Restful Table response >requires< JSON response as the OK
+
+                    if (ruleEnableSuccess && ruleNameSuccess && rulePatternSuccess)
+                        return Response.ok("{}").build(); //AJS Restful Table response >requires< JSON response as the OK
+                    else
+                        throw new Exception ("Rule was not updated!");
                 }
 
             }
             catch (Exception e) {
-                log.error("Failed to update a MatchRule. An error occurred:", e);
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new RestErrorMessage("Failed to update MatchSecretRule." +
+                log.error("Failed to create/update a MatchRule. An error occurred:", e);
+                return Response.status(Response.Status.BAD_REQUEST).entity(new RestErrorMessage("Failed to update MatchSecretRule." +
                         "An error occurred, see server-logs for more information")).build();
             }
 
