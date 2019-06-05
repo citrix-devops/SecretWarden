@@ -69,17 +69,20 @@ define('SecretWarden/PullRequestUIOverview', [
             linkEle.removeClass("incomplete");
 
             var foundSecrets = scanResult["foundSecrets"]["foundSecrets"];
+            var prurl = navbuilder.currentPullRequest().addPathComponents('diff').build();
+            prurl = prurl.substring(0, prurl.lastIndexOf("/")); // Remove 'overview' from the URL
+
             var secretCount = foundSecrets.length;
 
             if (secretCount > 0) {
                 linkEle.addClass("hassecrets");
                 labEle.text(secretCount + " secrets found.");
-                setOnClickHandler(foundSecrets)
+                setOnClickHandler(foundSecrets, prurl)
 
             } else if (secretCount === 0) {
                 linkEle.addClass("nosecrets");
                 labEle.text("No secrets were found");
-                setOnClickHandler(foundSecrets)
+                setOnClickHandler(foundSecrets, prurl)
             } else {
                 updateOverviewLinkAsFailed();
             }
@@ -96,7 +99,7 @@ define('SecretWarden/PullRequestUIOverview', [
         }
 
         // When secret have been found, handle on click so that they are displayed in a dialog
-        function setOnClickHandler(foundSecrets) {
+        function setOnClickHandler(foundSecrets, prurl) {
 
             if (onLinkClickHasBeenSet)
                 return;
@@ -105,7 +108,7 @@ define('SecretWarden/PullRequestUIOverview', [
                 e.preventDefault();
 
                 if (foundSecrets.length > 0)
-                    var dialog = AJS.dialog2($(com.cyanoth.secretwarden.overviewDialog({foundSecrets: foundSecrets})));
+                    var dialog = AJS.dialog2($(com.cyanoth.secretwarden.overviewDialog({foundSecrets: foundSecrets, prurl: prurl})));
                 else
                     var dialog = AJS.dialog2($(com.cyanoth.secretwarden.noSecretsDialog()));
 
