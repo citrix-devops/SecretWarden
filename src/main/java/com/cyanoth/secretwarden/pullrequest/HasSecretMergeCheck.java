@@ -1,5 +1,6 @@
 package com.cyanoth.secretwarden.pullrequest;
 
+import com.atlassian.bitbucket.concurrent.LockService;
 import com.atlassian.bitbucket.hook.repository.*;
 import com.atlassian.bitbucket.permission.Permission;
 import com.atlassian.bitbucket.permission.PermissionService;
@@ -27,16 +28,19 @@ public class HasSecretMergeCheck implements RepositoryMergeCheck {
     private static final Logger log = LoggerFactory.getLogger(HasSecretMergeCheck.class);
     private final PermissionService permissionService;
     private final PullRequestService pullRequestService;
+    private final LockService lockService;
     private final PullRequestSecretScanResultCache pullRequestSecretScanResultCache;
     private final MatchRuleSetCache matchRuleSetCache;
 
     @Autowired
     public HasSecretMergeCheck(@ComponentImport PermissionService permissionService,
                                @ComponentImport PullRequestService pullRequestService,
+                               @ComponentImport LockService lockService,
                                PullRequestSecretScanResultCache pullRequestSecretScanResultCache,
                                MatchRuleSetCache matchRuleSetCache) {
         this.permissionService = permissionService;
         this.pullRequestService = pullRequestService;
+        this.lockService = lockService;
         this.pullRequestSecretScanResultCache = pullRequestSecretScanResultCache;
         this.matchRuleSetCache = matchRuleSetCache;
     }
@@ -51,7 +55,7 @@ public class HasSecretMergeCheck implements RepositoryMergeCheck {
             final Repository repository = pullRequest.getToRef().getRepository();
 
             PullRequestSecretScanResult pullRequestScan = new PullRequestSecretScanner(pullRequestService, pullRequest,
-                    pullRequestSecretScanResultCache, matchRuleSetCache).scan(false);
+                    lockService, pullRequestSecretScanResultCache, matchRuleSetCache).scan(false);
 
             int secretCount = pullRequestScan.countFoundSecrets();
             if (secretCount > 0) {
