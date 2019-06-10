@@ -62,7 +62,7 @@ public class ScanResult{
                 return Response.status(Response.Status.FORBIDDEN).build();
             }
 
-            PullRequestSecretScanResult result = pullRequestSecretScanResultCache.get(projectKey, repoSlug, pullRequestId);
+            PullRequestSecretScanResult result = pullRequestSecretScanResultCache.get(repo.getId(), pullRequestId);
 
             if (result == null) {
                 return Response.status(Response.Status.NOT_FOUND).build();

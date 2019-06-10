@@ -42,25 +42,21 @@ public class PullRequestSecretScanResultCache {
 
     @Nullable
     PullRequestSecretScanResult get(@Nonnull PullRequest pullRequest) {
-        return get(pullRequest.getToRef().getRepository().getProject().getKey(),
-                        pullRequest.getToRef().getRepository().getSlug(),
-                        pullRequest.getId());
+        return get(pullRequest.getToRef().getRepository().getId(), pullRequest.getId());
     }
 
     @Nullable
-    public PullRequestSecretScanResult get(@Nonnull String projectKey, @Nonnull String repoSlug, long pullRequestId) {
-        final String cacheKey = genCacheKey(projectKey, repoSlug, pullRequestId);
+    public PullRequestSecretScanResult get(int repositoryId, long pullRequestId) {
+        final String cacheKey = genCacheKey(repositoryId, pullRequestId);
         return cache().containsKey(cacheKey) ? cache().get(cacheKey): null;
     }
 
     public void put(@Nonnull PullRequest pullRequest, @Nonnull PullRequestSecretScanResult scanResult) {
-        put(pullRequest.getToRef().getRepository().getProject().getKey(),
-                pullRequest.getToRef().getRepository().getSlug(),
-                pullRequest.getId(), scanResult);
+        put(pullRequest.getToRef().getRepository().getId(), pullRequest.getId(), scanResult);
     }
 
-    public void put(@Nonnull String projectKey, @Nonnull String repoSlug, long pullRequestId, @Nonnull PullRequestSecretScanResult scanResult) {
-        cache().put(genCacheKey(projectKey, repoSlug, pullRequestId), scanResult);
+    public void put(int repositoryId, long pullRequestId, @Nonnull PullRequestSecretScanResult scanResult) {
+        cache().put(genCacheKey(repositoryId, pullRequestId), scanResult);
     }
 
     public void clear() {
@@ -69,8 +65,8 @@ public class PullRequestSecretScanResultCache {
     }
 
     @NotNull
-    private String genCacheKey(String projectKey, String repoSlug, Long pullRequestId) {
-        return projectKey + "__" +  repoSlug + "__" + pullRequestId;
+    private String genCacheKey(int repoId, Long pullRequestId) {
+        return repoId + "__" + pullRequestId;
     }
 
     private Cache<String, PullRequestSecretScanResult> cache() {

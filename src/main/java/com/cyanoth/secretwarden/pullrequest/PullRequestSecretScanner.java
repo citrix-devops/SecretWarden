@@ -197,9 +197,9 @@ public class PullRequestSecretScanner implements SecretScanner {
          if (!(scope instanceof PullRequest))
             return null;
 
-        String projectKey = pullRequest.getToRef().getRepository().getProject().getKey();
-        String repoSlug = pullRequest.getToRef().getRepository().getSlug();
-        String lockKey = String.format("com.cyanoth.secretwarden.prscan.lock_%s_%s_%d", projectKey, repoSlug, pullRequest.getId());
+
+        String lockKey = String.format("com.cyanoth.secretwarden.prscan.lock_%d_%d",
+                pullRequest.getToRef().getRepository().getId(), pullRequest.getId());
 
         return lockService.getLock(lockKey);
     }
