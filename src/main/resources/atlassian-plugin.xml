@@ -8,7 +8,7 @@
     </plugin-info>
 
     <!-- Merge Check Resources -->
-    <repository-merge-check key="has-secret-pr-merge-check" name="Prevent Merging Secrets" class="bean:HasSecretMergeCheck" configurable="true">
+    <repository-merge-check key="has-secret-pr-merge-check" name="SecretWarden: Prevent Merging Secrets" class="bean:HasSecretMergeCheck" configurable="true">
         <icon>images/secretwarden_hook_icon.png</icon>
         <description>Require a repository administrator to merge pull-request if the pull request contains secrets</description>
         <scopes>
