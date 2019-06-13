@@ -26,7 +26,7 @@ define('SecretWarden/PullRequestUIOverview', [
                 url: navbuilder.rest("secretwarden").addPathComponents("prscan", "result", state.getProject().key,
                      state.getRepository().slug, state.getPullRequest().id).build(),
                 type: 'GET',
-                async: false,
+                async: true, // Adverse behaviour if False (Will stop further javascript code) 
                 success: function (results, textStatus, jqXHR) {
 
                     if (jqXHR.status === 200) {
