@@ -108,7 +108,7 @@ public class PullRequestSecretScanner implements SecretScanner {
         if (log.isDebugEnabled()) // Debug mode will time how long it takes
             scanStartTime = System.currentTimeMillis();
 
-        log.debug(String.format("SecretWarden has obtained a clusterlock to scan the pull-request %s", prString()));
+        log.debug(String.format("SecretWarden is performing a scan on pull-request %s", prString()));
 
         scanResult = new PullRequestSecretScanResult(pullRequest.getUpdatedDate());
         scanResult.setSecretScanStatus(SecretScanStatus.IN_PROGRESS);
