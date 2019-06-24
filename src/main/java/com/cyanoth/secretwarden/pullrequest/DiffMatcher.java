@@ -37,6 +37,7 @@ class DiffMatcher extends AbstractDiffContentCallback {
     private String destinationFilePath = null;
     private String sourceContext = null;
     private int lineCounter = 0;
+    private boolean countLine = true;
 
     /**
      * INTERNAL: Finds & collect secrets that match rules in the ruleset in a given hunk of changes.
@@ -55,13 +56,18 @@ class DiffMatcher extends AbstractDiffContentCallback {
 
     @Override
     public void onHunkStart(int srcLine, int srcSpan, int dstLine, int dstSpan, @Nullable String context) {
-        lineCounter = dstLine - 1; // Always off-by-one, so fix it
+        lineCounter = dstLine - 1; // The first ++ occurs before the line is compared, so will always be off-by-one without -1
         sourceContext = context;
     }
 
     @Override
     public void onSegmentLine(@Nonnull String s, @Nullable ConflictMarker conflictMarker, boolean b) {
-        lineCounter++;
+
+        // The line counter logic must consider only Added Lines _AND_ Context (unchanged) lines on the Destination File.
+        // Lines which are being removed will not be in the destination file, otherwise the occurrence line number
+        // of a secret will always be off by +(number_removed_lines).
+        if (countLine)
+            lineCounter++;
 
         if (!flagScanSegment || conflictMarker != null) // Don't scan this code segment if preconditions for a scan is false or in conflict.
             return;
@@ -81,6 +87,7 @@ class DiffMatcher extends AbstractDiffContentCallback {
     public void onSegmentStart(@Nonnull DiffSegmentType type) {
         // Only care about added (changed) lines. Precondition for scan will be false on context/deleted lines.
         flagScanSegment = type == DiffSegmentType.ADDED;
+        countLine = type != DiffSegmentType.REMOVED;
     }
 
     /*
